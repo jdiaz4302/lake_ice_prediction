@@ -66,9 +66,9 @@ found_iteration = 262
 ### Outputs
 
 ```python
-train_data_fpath = out_dir + 'train_data_updated.npz'
-valid_data_fpath = out_dir + 'valid_data_updated.npz'
-test_data_fpath = out_dir + 'test_data_updated.npz'
+train_data_fpath = out_dir + 'train_data.npz'
+valid_data_fpath = out_dir + 'valid_data.npz'
+test_data_fpath = out_dir + 'test_data.npz'
 ```
 
 # Import
