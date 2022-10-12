@@ -240,7 +240,11 @@ DOW_proportions
 df = df.merge(DOW_proportions, how = 'left', on = 'DOW')
 ```
 
-# Perform a random search of different year-bound partitions
+# Sample different lakes into the test set many times
+
+Always achieve a desired test set proportion, then track valid/train size. After lots of iterations, select the sample of test set lakes that maximizes training data.
+
+Years are set/fixed based on a preference for evaluating future years. 8 years (2010-2017, inclusive) was seen as a minimum good test set.
 
 ```python
 def partition_by_lakes(dataset, possible_lakes, desired_prop, total_N, rng):
