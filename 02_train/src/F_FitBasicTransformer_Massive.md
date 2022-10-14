@@ -17,6 +17,8 @@ jupyter:
 import numpy as np
 import torch
 import torch.nn as nn
+from torch import Tensor
+import math
 import gc
 ```
 
@@ -49,15 +51,17 @@ valid_data_fpath = extended_dir + valid_data_fpath
 epochs = 10000
 # different, coarser printing compared to other models that
 # early stop much sooner
-coarse_epoch_printing = 1000
+coarse_epoch_printing = 50
 
 # model hyperparams
 random_seed = 4 # change for different 'random' initializations
-model_dim = 16
-dropout_val = 0.1 # matching encoder default value
+model_dim = 512
+ff_dim = 2048
+nheads = 8
+n_enc_layers = 6
 
 # data loader hyperparams
-bs = 2615 # full batch
+bs = 100
 shuffle = True
 pin_memory = True # supposedly faster for CPU->GPU transfers
 
@@ -71,11 +75,11 @@ early_stop_patience = 50
 train_out_dir = '02_train/out/'
 
 # note that file names are adjusted with seed value
-data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_' + str(random_seed) + '_.pt'
-model_weights_fpath = train_out_dir + 'avg_lstm_weights_' + str(random_seed) + '_.pth'
-train_predictions_fpath = train_out_dir + 'avg_lstm_train_preds_' + str(random_seed) + '_.npy'
-valid_predictions_fpath = train_out_dir + 'avg_lstm_valid_preds_' + str(random_seed) + '_.npy'
-loss_lists_fpath = train_out_dir + 'avg_lstm_loss_lists_' + str(random_seed) + '_.npz'
+data_scalars_fpath =  train_out_dir + 'massive_transformer_min_max_scalars_' + str(random_seed) + '_.pt'
+model_weights_fpath = train_out_dir + 'massive_transformer_weights_' + str(random_seed) + '_.pth'
+train_predictions_fpath = train_out_dir + 'massive_transformer_train_preds_' + str(random_seed) + '_.npy'
+valid_predictions_fpath = train_out_dir + 'massive_transformer_valid_preds_' + str(random_seed) + '_.npy'
+loss_lists_fpath = train_out_dir + 'massive_transformer_loss_lists_' + str(random_seed) + '_.npz'
 ```
 
 ```python
@@ -139,27 +143,66 @@ for i in range(train_x.shape[2]):
                         (min_max_scalars[i, 1] - min_max_scalars[i, 0]))
 ```
 
-# Define a simple LSTM
+# Define a simple transformer (encoder-only)
 
 ```python
-class BasicLSTM(nn.Module):
-    def __init__(self, input_dim, hidden_dim, dropout):
+class PositionalEncoding(nn.Module):
+
+    def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 365):
+        super().__init__()
+        self.dropout = nn.Dropout(p=dropout)
+
+        position = torch.arange(max_len).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
+        pe = torch.zeros(max_len, 1, d_model)
+        pe[:, 0, 0::2] = torch.sin(position * div_term)
+        pe[:, 0, 1::2] = torch.cos(position * div_term)
+        pe = torch.moveaxis(pe, [0, 1, 2], [1, 0, 2]) # BATCH FIRST
+        self.register_buffer('pe', pe)
+
+    def forward(self, x: Tensor) -> Tensor:
+        """
+        Args:
+            x: Tensor, shape [seq_len, batch_size, embedding_dim]
+        """
+        x = x + self.pe[:x.size(0)]
+        return self.dropout(x)
+```
+
+```python
+# recycled model code
+class BasicTransformer(nn.Module):
+    def __init__(self, input_dim, seq_len, model_dim, nheads, ff_dim, n_encoder_layers):
         super().__init__()
         
-        self.lstm = nn.LSTM(input_dim, hidden_dim,
-                            batch_first = True)
-        self.dropout = nn.Dropout(p = dropout)
+        self.embedding = nn.Sequential(
+            torch.nn.Linear(input_dim, model_dim),
+            torch.nn.ReLU()
+        )
+        self.pos_encoding = PositionalEncoding(model_dim)
         
-        self.dense = nn.Linear(hidden_dim, 1)
-        self.activation = nn.Sigmoid()
+        self.mask = (torch.triu(torch.ones((seq_len, seq_len))) == 0)
+        self.mask = self.mask.transpose(0, 1)
+        self.mask = self.mask.cuda()
+        
+        encoder_layers = nn.TransformerEncoderLayer(d_model = model_dim,
+                                                    nhead = nheads,
+                                                    batch_first = True,
+                                                    dim_feedforward = ff_dim)
+        self.encoder = nn.TransformerEncoder(encoder_layers, n_encoder_layers)
+        
+        self.dense = nn.Linear(model_dim, 1)
+        self.dense_activation = nn.Sigmoid()
         
     def forward(self, x):
+        """Assumes x is of shape (batch, sequence, feature)"""
         
-        lstm_out, (h, c) = self.lstm(x)
-        
-        drop_out = self.dropout(lstm_out)
-        
-        out = self.activation(self.dense(drop_out))
+        embed = self.embedding(x)
+        position = self.pos_encoding(embed)
+        embed = embed + position
+        # mask = src_mask for nn.TransformerEncoder
+        encoded = self.encoder(embed, mask = self.mask)
+        out = self.dense_activation(self.dense(encoded))
         
         return out
 ```
@@ -174,7 +217,7 @@ torch.manual_seed(random_seed)
 # initialize random mini batches with numpy seed
 np.random.seed(random_seed)
 
-model = BasicLSTM(train_x.shape[2], model_dim, dropout_val).cuda()
+model = BasicTransformer(train_x.shape[2], train_x.shape[1], model_dim, nheads, ff_dim, n_enc_layers).cuda()
 
 # print number of model params
 sum(param.numel() for param in model.parameters())

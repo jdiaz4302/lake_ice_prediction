@@ -49,15 +49,18 @@ valid_data_fpath = extended_dir + valid_data_fpath
 epochs = 10000
 # different, coarser printing compared to other models that
 # early stop much sooner
-coarse_epoch_printing = 1000
+coarse_epoch_printing = 50
 
 # model hyperparams
 random_seed = 4 # change for different 'random' initializations
-model_dim = 16
+params = 3159041 # matching the full size, encoder only, transformer
+model_dim = int(np.round((1/8)*(np.sqrt(16*params + 2385) - 49))) # assumes 11 variables 
+# ^ solves for y where y = 4x^2 + 49x + 1
+# which was originally y = 11*4*x + 4*x*x + 4*x + 1*x + 1
 dropout_val = 0.1 # matching encoder default value
 
 # data loader hyperparams
-bs = 2615 # full batch
+bs = 1000
 shuffle = True
 pin_memory = True # supposedly faster for CPU->GPU transfers
 
@@ -71,11 +74,11 @@ early_stop_patience = 50
 train_out_dir = '02_train/out/'
 
 # note that file names are adjusted with seed value
-data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_' + str(random_seed) + '_.pt'
-model_weights_fpath = train_out_dir + 'avg_lstm_weights_' + str(random_seed) + '_.pth'
-train_predictions_fpath = train_out_dir + 'avg_lstm_train_preds_' + str(random_seed) + '_.npy'
-valid_predictions_fpath = train_out_dir + 'avg_lstm_valid_preds_' + str(random_seed) + '_.npy'
-loss_lists_fpath = train_out_dir + 'avg_lstm_loss_lists_' + str(random_seed) + '_.npz'
+data_scalars_fpath =  train_out_dir + 'large_lstm_min_max_scalars_' + str(random_seed) + '_.pt'
+model_weights_fpath = train_out_dir + 'large_lstm_weights_' + str(random_seed) + '_.pth'
+train_predictions_fpath = train_out_dir + 'large_lstm_train_preds_' + str(random_seed) + '_.npy'
+valid_predictions_fpath = train_out_dir + 'large_lstm_valid_preds_' + str(random_seed) + '_.npy'
+loss_lists_fpath = train_out_dir + 'large_lstm_loss_lists_' + str(random_seed) + '_.npz'
 ```
 
 ```python
