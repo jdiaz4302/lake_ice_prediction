@@ -396,7 +396,7 @@ len([dow for dow in valid_df['DOW'].unique() if dow in test_df['DOW'].unique()])
 ```
 
 ```python
-# Percent of valid lakes appearing in test set
+# Percent of valid lakes appearing in train set
 #   Not 100% due to timing of available observations
 len([dow for dow in valid_df['DOW'].unique() if dow in train_df['DOW'].unique()]) / valid_df['DOW'].unique().shape[0]
 ```
