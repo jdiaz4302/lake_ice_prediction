@@ -15,13 +15,22 @@ jupyter:
 
 ```python
 import numpy as np
-import datetime
+import datetime 
 import matplotlib.pyplot as plt
 import pandas as pd
-from pylab import cm
-
-np.random.seed(123)
 ```
+
+# What happens in this notebook?
+
+1. Additional static variables are added - lake area and lake depth
+2. Certain variables are removed (due to their missingness or their expected availability outside the study area)
+3. Data is split into train, validation, and test partitions
+  * The test partition consists of lakes and years that are not represented in the validation and train partitions
+    * Notably, the test partition consists of the most recent years (2010-2017)
+  * The validation and train partitions share lakes, but contain mutually exclusive years
+    * Validation = 2005-2009
+    * Train = 1980-2004
+
 
 # Configuration
 
@@ -39,10 +48,23 @@ mapping_reference = "../in/MN_ice/raw_data_from_DNR/lake_ice_id_spreadsheet.xlsx
 ### Values
 
 ```python
+random_seed = 123
+
 date_format = '%Y-%m-%d'
 
 vars_to_keep = ['ShortWave', 'LongWave', 'AirTemp', 'RelHum', 'WindSpeed', 'Rain',
                 'Snow', 'ice', 'temp_0_x', 'MaxDepth', 'LakeArea']
+
+# compatible with earlier efforts, leaves enough to train and eval with
+# a 'soft' test set can be larger, consisting of train/eval lakes during test years
+# and test lakes during train/eval years
+test_set_prop = 0.08
+
+test_start_year = 2010
+valid_start_year = 2005
+
+# num times to attempt to find a test set that maximizes training data
+try_n_test_partitions = 10000
 ```
 
 ### Outputs
@@ -195,6 +217,11 @@ df = pd.DataFrame({"DOW":DOW.astype(int),
                    "dates":dates[:, 0].astype(np.datetime64)})
 df = df.dropna()
 df['dates'] = df['dates'].astype(np.datetime64)
+
+lat_lon_ref_df = lat_lon_ref_df.rename(columns = {'dow num':'DOW'})
+df = df.merge(lat_lon_ref_df, how = 'left', on = 'DOW')
+
+df['year'] = [date.year for date in df['dates']]
 ```
 
 ### Figure out what % of the data each lake represents
@@ -209,10 +236,18 @@ DOW_proportions = DOW_proportions.rename(columns = {'DOW':'prop',
 DOW_proportions
 ```
 
-### Randomly sample lakes until we get 20% of the data
+```python
+df = df.merge(DOW_proportions, how = 'left', on = 'DOW')
+```
+
+# Sample different lakes into the test set many times
+
+Always achieve a desired test set proportion, then track valid/train size. After lots of iterations, select the sample of test set lakes that maximizes training data.
+
+Years are set/fixed based on a preference for evaluating future years. 8 years (2010-2017, inclusive) was seen as a minimum good test set.
 
 ```python
-def partition_by_lakes(dataset, possible_lakes, desired_prop):
+def partition_by_lakes(dataset, possible_lakes, desired_prop, total_N, rng):
     
     # arguments
     #     `dataset` is the dataset we're partitioning.
@@ -221,100 +256,111 @@ def partition_by_lakes(dataset, possible_lakes, desired_prop):
     #        As the sampling continues, we remove values.
     #     `desired_prop` is the proportion of the data set
     #        that we want this partition to cover.
+    #     `total_N` is the number of available sequences across
+    #        all lakes and years
+    #     `rng` is a np.random.RandomState object (opposed to
+    #        np.random.seed setting)
     # returns
     #     `partition_lakes` are the random DOWs representing
-    #        the desired proportion of the data set
-    #     `possible_lakes` are the reduced DOWs that we can
-    #        further sample for additional partitions.
+    #        the desired minimum proportion of the data set
     
     partition_lakes = []
     cumulative_sum = 0 
 
-    while cumulative_sum < 0.2:
+    while cumulative_sum < desired_prop:
         # add a random new lake to the partition
-        rand_DOW = np.random.choice(possible_DOWs)
+        rand_DOW = rng.choice(possible_lakes)
         partition_lakes.append(rand_DOW)
 
         # subset the data set to those sampled partitions
         # and determine what % we are at
         cumulative_subset = dataset[dataset.DOW.isin(partition_lakes)]
-        cumulative_sum = np.sum(cumulative_subset['prop'])
+        cumulative_sum = cumulative_subset.shape[0] / total_N
 
         # sample without replacement
-        possible_DOWs.remove(rand_DOW)
-
-    # State what literal proportion we achieved and
-    # how many lakes that represents
-    print(cumulative_sum, len(partition_lakes))
+        possible_lakes.remove(rand_DOW)
     
-    return(partition_lakes, possible_lakes)
+    return(partition_lakes)
 ```
 
 ```python
-possible_DOWs = list(DOW_proportions['DOW'].copy())
-
-valid_lakes, possible_DOWs = partition_by_lakes(DOW_proportions,
-                                                possible_DOWs,
-                                                0.2)
-test_lakes, possible_DOWs = partition_by_lakes(DOW_proportions,
-                                               possible_DOWs,
-                                               0.2)
+dev_period = df[df['year'] < test_start_year]
+test_period = df[df['year'] >= test_start_year]
 ```
 
 ```python
-DOW_proportions['train'] = DOW_proportions.DOW.isin(possible_DOWs)
-DOW_proportions['valid'] = DOW_proportions.DOW.isin(valid_lakes)
-DOW_proportions['test'] = DOW_proportions.DOW.isin(test_lakes)
-```
-
-# Very basic mapping of the partitions
-
-```python
-lat_lon_ref_df = lat_lon_ref_df.rename(columns = {'dow num':'DOW'})
-lat_lon_ref_df = lat_lon_ref_df.merge(DOW_proportions, on='DOW')
-
-seq_DOWs = pd.DataFrame({'DOW':DOW})
-
-mapping_df = seq_DOWs.merge(lat_lon_ref_df, on='DOW', how = 'left')
-mapping_df.head()
+RNG = np.random.RandomState(random_seed)
 ```
 
 ```python
-fig, ax = plt.subplots(1, 3, figsize = (15, 5))
-cmap = cm.get_cmap('viridis', 2)
+%%time
 
-count = 0
-for col in ['train', 'valid', 'test']:
-    ax[count].set_title(col + ' lake locations (yellow)\nN sequences = ' + str(np.sum(mapping_df[col])))
-    ax[count].scatter(mapping_df['long'], mapping_df['lat'], cmap = cmap,
-                      c = mapping_df[col], marker = '^')
-    count += 1
-    
-print('WARNING: Some lakes may not be displayed due to missing values in the lat/lon\n' + 
-      '         data set, but they are in-fact present in the model-ready partitions.')
+test_lake_candidates = []
+partition_sizes = np.zeros([try_n_test_partitions, 3])
+
+for count in range(try_n_test_partitions):
+    # sample random lakes that are observed in the test years for possible exclusion
+    # from train/valid sets
+    test_lakes = partition_by_lakes(test_period,
+                                    list(test_period['DOW'].copy()),
+                                    test_set_prop,
+                                    df.shape[0],
+                                    RNG)
+
+    # Make the test set consist exclusive lakes (on top of exclusive years)
+    test_df = test_period[test_period['DOW'].isin(test_lakes)]
+
+    # Train/valid will be earlier period omitting test lakes
+    dev_df = dev_period[dev_period['DOW'].isin(test_lakes) == False]
+
+    # Separate train/valid by year
+    valid_df = dev_df[dev_df['year'] >= valid_start_year]
+    train_df = dev_df[dev_df['year'] < valid_start_year]
+
+    # Keep track of each random attempt...
+    # ...partition sizes (relative to whole)
+    partition_sizes[count] = (train_df.shape[0] / df.shape[0],
+                              valid_df.shape[0] / df.shape[0],
+                              test_df.shape[0] / df.shape[0])
+    # ...test set lakes omitted
+    test_lake_candidates.append(test_lakes)
 ```
 
-# Actually split the model ready sequences
+```python
+# what maximizes the training set with the desired test set prop?
+found_iteration = np.argmax(partition_sizes[:, 0])
+test_lakes = test_lake_candidates[found_iteration]
+
+# 50/16.5/8 split
+partition_sizes[found_iteration, :]
+```
 
 ```python
-train_indices = []
-valid_indices = []
-test_indices = []
+# test years and test lakes
+test_df = test_period[test_period['DOW'].isin(test_lakes)]
 
-count = 0
-for dow in DOW:
-    if dow in possible_DOWs:
-        train_indices.append(count)
-    elif dow in valid_lakes:
-        valid_indices.append(count)
-    elif dow in test_lakes:
-        test_indices.append(count)
-    else:
-        print('WARNING', count)
-        
-    count += 1
+# Train/valid will be earlier period omitting test lakes
+dev_df = dev_period[dev_period['DOW'].isin(test_lakes) == False]
 
-len(train_indices), len(valid_indices), len(test_indices)
+# Separate train/valid by year
+valid_df = dev_df[dev_df['year'] >= valid_start_year]
+train_df = dev_df[dev_df['year'] < valid_start_year]
+```
+
+```python
+# plot the partitions
+fig, ax = plt.subplots(1, 2, figsize = (12, 6))
+
+ax[0].scatter(train_df['long'], train_df['lat'], s = 10, label = 'train')
+ax[0].scatter(valid_df['long'], valid_df['lat'], s = 10, label = 'valid')
+ax[0].scatter(test_df['long'], test_df['lat'], s = 10, label = 'test')
+ax[0].legend();
+
+# transparency to demostrate no overlap
+plt.hist(train_df['year'], bins = np.arange(1980, 2020), label = 'train', alpha = 0.75)
+plt.hist(valid_df['year'], bins = np.arange(1980, 2020), label = 'eval', alpha = 0.75)
+plt.hist(test_df['year'], bins = np.arange(1980, 2020), label = 'test', alpha = 0.75)
+plt.legend();
 ```
 
 ```python
@@ -335,11 +381,27 @@ def save_partition_data(indices, fpath):
 ```
 
 ```python
-save_partition_data(train_indices, train_data_fpath)
-save_partition_data(valid_indices, valid_data_fpath)
-save_partition_data(test_indices, test_data_fpath)
+save_partition_data(train_df.index, train_data_fpath)
+save_partition_data(valid_df.index, valid_data_fpath)
+save_partition_data(test_df.index, test_data_fpath)
+```
+
+<br><br><br><br>
+
+# Lake overlap checking
+
+```python
+# Percent of valid lakes appearing in test set
+len([dow for dow in valid_df['DOW'].unique() if dow in test_df['DOW'].unique()]) / valid_df['DOW'].unique().shape[0]
 ```
 
 ```python
+# Percent of valid lakes appearing in train set
+#   Not 100% due to timing of available observations
+len([dow for dow in valid_df['DOW'].unique() if dow in train_df['DOW'].unique()]) / valid_df['DOW'].unique().shape[0]
+```
 
+```python
+# Percent of train lakes appearing in test set
+len([dow for dow in test_df['DOW'].unique() if dow in train_df['DOW'].unique()]) / test_df['DOW'].unique().shape[0]
 ```
