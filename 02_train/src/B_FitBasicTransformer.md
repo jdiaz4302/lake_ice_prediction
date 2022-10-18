@@ -195,9 +195,8 @@ class BasicTransformer(nn.Module):
         """Assumes x is of shape (batch, sequence, feature)"""
         
         embed = self.embedding(x)
-        position = self.pos_encoding(embed)
-        embed = embed + position
-        encoded = self.encoder(embed, src_mask = self.mask)
+        positioned_embed = self.pos_encoding(embed)
+        encoded = self.encoder(positioned_embed, src_mask = self.mask)
         out = self.dense_activation(self.dense(encoded))
         
         return out
