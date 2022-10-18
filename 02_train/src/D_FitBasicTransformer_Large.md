@@ -60,7 +60,7 @@ ff_dim = 2048
 nheads = 8
 
 # data loader hyperparams
-bs = 500
+bs = 375
 shuffle = True
 pin_memory = True # supposedly faster for CPU->GPU transfers
 
@@ -195,9 +195,8 @@ class BasicTransformer(nn.Module):
         """Assumes x is of shape (batch, sequence, feature)"""
         
         embed = self.embedding(x)
-        position = self.pos_encoding(embed)
-        embed = embed + position
-        encoded = self.encoder(embed, src_mask = self.mask)
+        positioned_embed = self.pos_encoding(embed)
+        encoded = self.encoder(positioned_embed, src_mask = self.mask)
         out = self.dense_activation(self.dense(encoded))
         
         return out
