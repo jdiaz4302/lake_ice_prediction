@@ -49,15 +49,19 @@ valid_data_fpath = extended_dir + valid_data_fpath
 epochs = 10000
 # different, coarser printing compared to other models that
 # early stop much sooner
-coarse_epoch_printing = 1000
+coarse_epoch_printing = 50
 
 # model hyperparams
 random_seed = 4 # change for different 'random' initializations
-model_dim = 16
+params = 18920961 # matching the full size, encoder only, transformer
+model_dim = int(np.round((1/88)*(np.sqrt(176*params + 4585) - 69))) # assumes 11 variables 
+# ^ solves for y where y = 4x^2 + 49x + 1
+# which was originally y = 11*4*x + 4*x*x + 4*x + 1*x + 1
 dropout_val = 0.1 # matching encoder default value
+nlayers = 6
 
 # data loader hyperparams
-bs = 2615 # full batch
+bs = 375
 shuffle = True
 pin_memory = True # supposedly faster for CPU->GPU transfers
 
@@ -71,11 +75,11 @@ early_stop_patience = 50
 train_out_dir = '02_train/out/'
 
 # note that file names are adjusted with seed value
-data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_' + str(random_seed) + '_.pt'
-model_weights_fpath = train_out_dir + 'avg_lstm_weights_' + str(random_seed) + '_.pth'
-train_predictions_fpath = train_out_dir + 'avg_lstm_train_preds_' + str(random_seed) + '_.npy'
-valid_predictions_fpath = train_out_dir + 'avg_lstm_valid_preds_' + str(random_seed) + '_.npy'
-loss_lists_fpath = train_out_dir + 'avg_lstm_loss_lists_' + str(random_seed) + '_.npz'
+data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_' + str(random_seed) + '_.pt'
+model_weights_fpath = train_out_dir + 'massive_lstm_weights_' + str(random_seed) + '_.pth'
+train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_' + str(random_seed) + '_.npy'
+valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_' + str(random_seed) + '_.npy'
+loss_lists_fpath = train_out_dir + 'massive_lstm_loss_lists_' + str(random_seed) + '_.npz'
 ```
 
 ```python
@@ -143,10 +147,11 @@ for i in range(train_x.shape[2]):
 
 ```python
 class BasicLSTM(nn.Module):
-    def __init__(self, input_dim, hidden_dim, dropout):
+    def __init__(self, input_dim, hidden_dim, nlayers, dropout):
         super().__init__()
         
         self.lstm = nn.LSTM(input_dim, hidden_dim,
+                            num_layers = nlayers,
                             batch_first = True)
         self.dropout = nn.Dropout(p = dropout)
         
@@ -174,7 +179,7 @@ torch.manual_seed(random_seed)
 # initialize random mini batches with numpy seed
 np.random.seed(random_seed)
 
-model = BasicLSTM(train_x.shape[2], model_dim, dropout_val).cuda()
+model = BasicLSTM(train_x.shape[2], model_dim, nlayers, dropout_val).cuda()
 
 # print number of model params
 sum(param.numel() for param in model.parameters())
