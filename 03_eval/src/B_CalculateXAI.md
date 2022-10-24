@@ -246,7 +246,10 @@ RNG = np.random.RandomState(eval_seed)
 # Set up expected gradients (EG)
 
 ```python
-def expected_gradients(x, x_set, model, n_samples, rng, temporal_focus=None, spatial_focus=None):
+def expected_gradients(x, x_set, model, n_samples, rng, dim_0_focus=None, dim_1_focus=None):
+    
+    # dim_0 corresponds to lakes
+    # dim_1 corresponds to time steps
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     
@@ -271,14 +274,14 @@ def expected_gradients(x, x_set, model, n_samples, rng, temporal_focus=None, spa
         y = model(curr_x)
 
         # GET GRADIENT
-        if temporal_focus == None and spatial_focus == None:
+        if dim_0_focus == None and dim_1_focus == None:
             gradients = torch.autograd.grad(y[:, :, :], curr_x, torch.ones_like(y[:, :, :]))
-        elif temporal_focus == None and spatial_focus != None:
-            gradients = torch.autograd.grad(y[spatial_focus, :, :], curr_x, torch.ones_like(y[spatial_focus, :, :]))
-        elif temporal_focus != None and spatial_focus == None:
-            gradients = torch.autograd.grad(y[:, temporal_focus, :], curr_x, torch.ones_like(y[:, temporal_focus, :]))
+        elif dim_1_focus == None and dim_0_focus != None:
+            gradients = torch.autograd.grad(y[dim_0_focus, :, :], curr_x, torch.ones_like(y[dim_0_focus, :, :]))
+        elif dim_1_focus != None and dim_0_focus == None:
+            gradients = torch.autograd.grad(y[:, dim_1_focus, :], curr_x, torch.ones_like(y[:, dim_1_focus, :]))
         else:
-            gradients = torch.autograd.grad(y[spatial_focus, temporal_focus, :], curr_x, torch.ones_like(y[spatial_focus, temporal_focus, :]))
+            gradients = torch.autograd.grad(y[dim_0_focus, dim_1_focus, :], curr_x, torch.ones_like(y[dim_0_focus, dim_1_focus, :]))
 
         if k == 0:
             expected_gradients = x_diff*gradients[0] * 1/n_samples
@@ -382,7 +385,7 @@ for i in range(n_eg_fine):
     
     # Calc expected gradients and store them
     eg_vals = expected_gradients(valid_x[[rand_valid_i]].cuda(), train_x, model, eg_samples, RNG,
-                                 temporal_focus = transition_ids_ice_on[rand_valid_i])
+                                 dim_1_focus = transition_ids_ice_on[rand_valid_i])
     valid_eg_results_ice_on[[i]] = eg_vals
 ```
 
@@ -404,7 +407,7 @@ for i in range(n_eg_fine):
     
     # Calc expected gradients and store them
     eg_vals = expected_gradients(valid_x[[rand_valid_i]].cuda(), train_x, model, eg_samples, RNG,
-                                 temporal_focus = transition_ids_ice_off[rand_valid_i])
+                                 dim_1_focus = transition_ids_ice_off[rand_valid_i])
     valid_eg_results_ice_off[[i]] = eg_vals
 ```
 
@@ -450,6 +453,10 @@ for n_i in range(perm_samples):
 # ICE
 
 ```python
+# 'resolution + 3' adds room in the grid of values for
+#    - a new extreme min
+#    - the existing max (python has exclusive max `range`)
+#    - a new extreme max
 ICE_x_array = np.zeros([len(valid_variables), resolution + 3])
 ICE_pred_array = np.zeros([len(valid_variables), resolution + 3, valid_x.shape[0], valid_x.shape[1], 1])
 ```
