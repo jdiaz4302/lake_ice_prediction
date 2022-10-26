@@ -502,14 +502,10 @@ eval_df.loc[len(eval_df)] = new_row
 As determined by average reduction in ice on, ice off, and ice duration RMSE
 
 ```python
-# get indices of date-based RMSEs in dataframe
-col_names_as_array = np.asarray(list(eval_df))
-i1 = np.argwhere(col_names_as_array == 'ice_on_rmse').item()
-i2 = np.argwhere(col_names_as_array == 'ice_off_rmse').item()
-i3 = np.argwhere(col_names_as_array == 'ice_dur_rmse').item()
-
 # get the percent change in RMSEs relative to PB ice flags
-perc_change_rmse = (eval_df.iloc[:, [i1, i2, i3]] - eval_df.iloc[-1, [i1, i2, i3]]) / eval_df.iloc[-1, [i1, i2, i3]]
+rmse_df = eval_df.loc[:, ['ice_on_rmse', 'ice_off_rmse', 'ice_dur_rmse']]
+rmse_pb = rmse_df.iloc[-1]
+perc_change_rmse = (rmse_df - rmse_pb)/rmse_pb
 
 # average percent change across the 3 columns
 eval_df['avg_rmse_change'] = np.mean(perc_change_rmse.values, axis = 1)
