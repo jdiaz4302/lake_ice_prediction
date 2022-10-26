@@ -714,21 +714,30 @@ Rather than just importance and timing, let's also get an idea for how predictio
 
 ```python
 for var_index in range(len(valid_variables)):
-    plt.plot(avg_valid_set_ICE_vals[var_index],
+    
+    var_min = avg_min_max_scalars[var_index, 0].item()
+    var_max = avg_min_max_scalars[var_index, 1].item()
+    var_name = valid_variables[var_index]
+    if var_name in ['MaxDepth', 'LakeArea']:
+        var_name = 'log ' + var_name
+    
+    unscale_factor = var_max - var_min
+    
+    plt.plot(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
              # reshape lumps all lakes and times together by variable
              np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
-    plt.scatter(avg_valid_set_ICE_vals[var_index],
+    plt.scatter(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
                 np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
                 label = 'avg lstm')
-    plt.plot(massive_valid_set_ICE_vals[var_index],
+    plt.plot(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
                 np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
-    plt.scatter(massive_valid_set_ICE_vals[var_index],
+    plt.scatter(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
                 np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
                 label = 'massive lstm')
     plt.ylabel('Probability of Ice Cover')
-    plt.xlabel(valid_variables[var_index] + '\n(min-max scaled)')
-    plt.axvline(0, color = 'grey', linestyle = '--', label = 'training limit')
-    plt.axvline(1, color = 'grey', linestyle = '--')
+    plt.xlabel(var_name)
+    plt.axvline(var_min, color = 'grey', linestyle = '--', label = 'training limit')
+    plt.axvline(var_max, color = 'grey', linestyle = '--')
     plt.legend()
     if var_index == 0:
         plt.title('Partial Dependence Plot')
