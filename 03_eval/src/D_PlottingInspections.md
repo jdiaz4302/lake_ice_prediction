@@ -17,6 +17,7 @@ jupyter:
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from scipy.stats import spearmanr
 ```
 
 # Configuration
@@ -32,10 +33,10 @@ train_out_dir = '../../02_train/out/'
 train_data_fpath = process_out_dir + 'train_data.npz'
 valid_data_fpath = process_out_dir + 'valid_data.npz'
 
-train_predictions_fpath = train_out_dir + 'limitted_lstm_train_preds.npy'
-valid_predictions_fpath = train_out_dir + 'limitted_lstm_valid_preds.npy'
+train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_1_.npy'
+valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_1_.npy'
 
-eval_metrics_fpath = '../out/eval_metrics.npz'
+eval_metrics_fpath = '../out/massive_lstm_eval_metrics_1_.npz'
 
 mapping_reference = "../../01_process/in/MN_ice/raw_data_from_DNR/lake_ice_id_spreadsheet.xlsx"
 ```
@@ -70,7 +71,11 @@ valid_predictions = np.load(valid_predictions_fpath)
 ```python
 # Programmatically identify process-based ice flag data
 ice_var_idx = int(np.argwhere(train_variables == 'ice'))
+depth_var_idx = int(np.argwhere(train_variables == 'MaxDepth'))
+area_var_idx = int(np.argwhere(train_variables == 'LakeArea'))
 assert valid_variables[ice_var_idx] == 'ice'
+assert valid_variables[depth_var_idx] == 'MaxDepth'
+assert valid_variables[area_var_idx] == 'LakeArea'
 ```
 
 ```python
@@ -90,7 +95,7 @@ np.random.seed(123)
 #   PB ice flag
 #   50% probability line
 #   Date and DOW of time series
-for i in range(10):
+for i in range(20):
     rand_i = np.random.choice(valid_predictions.shape[0])
 
     plt.figure(figsize = (15, 2))
@@ -183,9 +188,91 @@ map_error('error_ice_off', 0.2)
 map_error('error_dur', 0.2)
 ```
 
-# TO DO:
+# Do residuals significantly vary with certain lake characteristics?
 
-Add some more evaluation for how error changes other lake characteristics: depth, area, etc
+Some additional evaluation for how residuals change with certain lake characteristics: lat, long, depth, and area. These residual-inspecting plots include a nonlinear correlation and p-value
+
+```python
+def plot_and_print_resid_corr(values, label):
+    
+    # globally accessed mapping_df, assuming its column names (residuals), and associated axis labels
+    
+    fig, ax = plt.subplots(1, 3, figsize = (15, 5))
+    
+    fig.suptitle('Correlation of Residuals with Static Lake Descriptions')
+
+    ax[0].scatter(values, mapping_df['flag_error_ice_on'], alpha = 0.5, label = 'Process-based')
+    ax[1].scatter(values, mapping_df['flag_error_ice_off'], alpha = 0.5)
+    ax[2].scatter(values, mapping_df['flag_error_dur'], alpha = 0.5)
+    ax[0].scatter(values, mapping_df['pred_error_ice_on'], alpha = 0.5, label = 'LSTM')
+    ax[1].scatter(values, mapping_df['pred_error_ice_off'], alpha = 0.5)
+    ax[2].scatter(values, mapping_df['pred_error_dur'], alpha = 0.5)
+    ax[0].legend()
+
+    ax[0].set_ylabel('Residual')
+    ax[0].set_title('Ice on')
+    ax[1].set_title('Ice off')
+    ax[1].set_xlabel(label, fontsize = 12)
+    ax[2].set_title('Ice duration')
+    
+    plt.show()
+
+    print('\nProcess-based residual correlations')
+    print('Ice on:\t\t', spearmanr(values, mapping_df['flag_error_ice_on']))
+    print('Ice off:\t', spearmanr(values, mapping_df['flag_error_ice_off']))
+    print('Ice duration:\t', spearmanr(values, mapping_df['flag_error_dur']))
+    print('\nLSTM-based residual correlations')
+    print('Ice on:\t\t', spearmanr(values, mapping_df['pred_error_ice_on']))
+    print('Ice off:\t', spearmanr(values, mapping_df['pred_error_ice_off']))
+    print('Ice duration:\t', spearmanr(values, mapping_df['pred_error_dur']), '\n')
+```
+
+```python
+plot_and_print_resid_corr(mapping_df['lat'], 'Latitude')
+```
+
+```python
+plot_and_print_resid_corr(mapping_df['long'], 'Longitude')
+```
+
+```python
+areas = valid_x[:, 0, area_var_idx]
+
+plot_and_print_resid_corr(areas, 'Lake Area\nlog-transformed')
+```
+
+```python
+depths = valid_x[:, 0, depth_var_idx]
+
+plot_and_print_resid_corr(depths, 'Lake Maximum Depth\nlog-transformed')
+```
+
+## List of significant residual correlations
+
+##### Latitude
+
+* The process-based model's and the massive lstm's residuals are signficantly correlated with latitude on all 3 date-based predictions
+    * Negatively correlated for ice on, positively correlated for ice off and ice duration
+  
+##### Longitude
+  
+* The process-based model's residuals are significantly and positively correlated with longitude for ice on prediction
+
+##### Lake area
+
+* The process-based model's residuals are significantly correlated with lake area on all 3 date-based predictions
+    * Negatively correlated for ice on, positively correlated for ice off and ice duration
+    
+##### Lake depth
+    
+* The process-based model's residuals are significantly correlated with lake depth on ice on and ice duration prediction
+    * Negatively correlated for ice on, positively correlated for ice duration
+* The massive lstm's residuals are significantly and positively correlated for ice on prediction
+
+### In total
+
+* The process-based model's residuals are significantly correlated with static lake descriptions in 9/12 tested scenarios, most notably latitude and lake area for all 3 date-based predictions.
+* The massive lstm's residuals are significantly correlated with static lake descriptions in 4/12 tested scenarios, with 3 of those scenarios involving latitude.
 
 ```python
 
