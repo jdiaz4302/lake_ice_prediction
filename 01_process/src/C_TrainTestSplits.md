@@ -72,6 +72,7 @@ try_n_test_partitions = 10000
 ```python
 train_data_fpath = out_dir + 'train_data.npz'
 valid_data_fpath = out_dir + 'valid_data.npz'
+soft_test_data_fpath = out_dir + 'soft_test_data.npz'
 test_data_fpath = out_dir + 'test_data.npz'
 ```
 
@@ -381,8 +382,20 @@ def save_partition_data(indices, fpath):
 ```
 
 ```python
+soft_test_indices = []
+for i in df.index:
+    if (i not in train_df.index) and (i not in valid_df.index) and (i not in test_df.index):
+        soft_test_indices.append(i)
+```
+
+```python
+assert (len(soft_test_indices) + train_df.shape[0] + valid_df.shape[0] + test_df.shape[0]) == df.shape[0]
+```
+
+```python
 save_partition_data(train_df.index, train_data_fpath)
 save_partition_data(valid_df.index, valid_data_fpath)
+save_partition_data(soft_test_indices, soft_test_data_fpath)
 save_partition_data(test_df.index, test_data_fpath)
 ```
 
