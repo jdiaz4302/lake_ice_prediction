@@ -548,7 +548,11 @@ plt.figure(figsize = (6, 6))
 # add 0-line reference representing no improvement over process-based
 plt.axhline(0, color = 'black', linestyle = '--')
 # add boxplot for conveniance, note: low n (5)
-plt.boxplot(avg_rmse_change_df[focal_models]);
+box_plot = plt.boxplot(avg_rmse_change_df[focal_models]);
+count = 0
+for median in box_plot['medians']:
+    median.set_color(list(color_dict.values())[count])
+    count += 1
 
 # plot individual performances
 count = 1
@@ -563,7 +567,30 @@ for i in range(n_compare):
 # extra formatting
 plt.ylabel('Change in RMSE (%)\nRelative to Process-Based RMSE')
 plt.title('Average Change in Date-based Performance:\nIce on, Ice off, Ice Duration')
-plt.xticks(range(1,6), focal_models, rotation = 45);
+plt.xticks(range(1,6), focal_models, rotation = 45)
+plt.savefig('../../overall_model_comparison.PNG', dpi = 300, bbox_inches = 'tight')
+```
+
+```python
+per_date_based_improvement = (rmse_df.iloc[:-1].values - rmse_pb.values) / rmse_pb.values
+titles = ['Ice on', 'Ice off', 'Ice duration']
+
+plt.figure(figsize = (6, 6))
+
+plt_objects = plt.boxplot(per_date_based_improvement)
+plt.axhline(0, color = 'gray', linestyle = '--')
+plt.scatter(range(1, len(titles)+1), per_date_based_improvement[best_i],
+            color = color_dict[eval_df['name'][best_i]], marker = 'x',
+            s = 100, label = 'best model', linewidth = 3)
+plt.legend()
+plt.ylabel('Change in RMSE (%)\nRelatiuve to Process-based RMSE')
+
+print("\nMedian improvement\t Best model's improvement")
+for i in range(len(plt_objects['medians'])):
+    print(plt_objects['medians'][i].get_xydata()[0, 1], '\t',
+          per_date_based_improvement[best_i, i])
+
+plt.xticks(range(1, len(titles)+1), titles);
 ```
 
 The best `massive lstm` performed best, but `massive lstm`s, in general, were a less reliable training set up.
