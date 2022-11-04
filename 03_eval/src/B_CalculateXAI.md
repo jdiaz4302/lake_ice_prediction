@@ -91,9 +91,9 @@ eval_seed = 0
 n_eg = 50
 # Number of validation samples for finer eval
 # (looking at EG with temporal focus on transition dates)
-n_eg_fine = 30
+n_eg_fine = 50
 # Number of EG algorithm samples (per call to that funct)
-eg_samples = 200 
+eg_samples = 200
 
 ### FOR METHOD 2: Permutation-based ###
 # Number of times to scramble the data for all validation samples
@@ -101,6 +101,12 @@ perm_samples = 200
 
 ### FOR METHOD 3: Individual conditional expectation ###
 resolution =  25
+# impose physical constraints (for out-of-bounds considerations)
+# leaving depth and area out because they're log-transformed and seeming non-problematic as-is
+vars_to_cap_at_0 = ['ShortWave', 'LongWave', 'RelHum', 'WindSpeed', 'Rain',
+                    'Snow', 'ice']
+vars_to_cap_at_1 = ['ice']
+vars_to_cap_at_100 = ['RelHum']
 ```
 
 ### Outputs
@@ -370,6 +376,11 @@ for i in range(valid_x.shape[0]):
 ### Ice on
 
 ```python
+# reinitiate random generator for same sequences as above
+RNG = np.random.RandomState(eval_seed)
+```
+
+```python
 # Storage objects
 valid_eg_results_ice_on = np.zeros([n_eg_fine, valid_x.shape[1], valid_x.shape[2]])
 sampled_valid_ids_ice_on = []
@@ -390,6 +401,11 @@ for i in range(n_eg_fine):
 ```
 
 ### Ice off
+
+```python
+# reinitiate random generator for same sequences as above
+RNG = np.random.RandomState(eval_seed)
+```
 
 ```python
 # Storage objects
@@ -477,6 +493,17 @@ for var_index in range(len(valid_variables)):
     grid_values = np.insert(grid_values, 0, lower_extreme_tail_val)
     grid_values = np.append(grid_values, upper_extreme_tail_val)
     
+    # identify the current variable and possibly impose some physical limits
+    cur_var = valid_variables[var_index]
+    if cur_var in vars_to_cap_at_0:
+        imposed_min = ((0 - min_max_scalars[var_index, 0]) / (min_max_scalars[var_index, 1] - min_max_scalars[var_index, 0]))
+        grid_values = np.clip(grid_values, a_min = imposed_min, a_max = None)
+    if cur_var in vars_to_cap_at_1:
+        imposed_max = ((1 - min_max_scalars[var_index, 0]) / (min_max_scalars[var_index, 1] - min_max_scalars[var_index, 0]))
+        grid_values = np.clip(grid_values, a_min = None, a_max = imposed_max)
+    if cur_var in vars_to_cap_at_100:
+        imposed_max = ((100 - min_max_scalars[var_index, 0]) / (min_max_scalars[var_index, 1] - min_max_scalars[var_index, 0]))
+        grid_values = np.clip(grid_values, a_min = None, a_max = imposed_max)
     
     # Generate predictions
     val_count = 0
