@@ -120,6 +120,7 @@ for i in range(20):
     plt.plot(test_preds[rand_i, :, 0], label = 'pred prob')
     plt.plot(test_x[rand_i, :, ice_var_idx], label = 'ice_flag', linestyle = '--')
     plt.title('DOW: ' + str(test_DOW[rand_i]) + ', Start date: ' + test_dates[rand_i][0])
+    plt.xlim(100, 325)
     plt.legend();
 ```
 
@@ -269,7 +270,7 @@ plot_and_print_resid_corr(depths, 'Lake Maximum Depth\nlog-transformed')
 
 * The process-based model's residuals are signficantly correlated with latitude on ice on and ice duration prediction. 
     * Negatively correlated for ice on, positively correlated for ice duration
-* The massive lstm's residuals are significantly and positively correlated with latitude on ice duration prediction.
+* The massive lstm's residuals are significantly and positively correlated with latitude on ice off and ice duration prediction.
   
 ##### Longitude
   
@@ -286,7 +287,43 @@ plot_and_print_resid_corr(depths, 'Lake Maximum Depth\nlog-transformed')
 ### In total
 
 * The process-based model's residuals are significantly correlated with static lake descriptions in 4/12 tested scenarios, half of these scenarios involve latitude.
-* The massive lstm's residuals are significantly correlated with static lake descriptions in 1/12 tested scenarios - latitude and ice duration prediction.
+* The massive lstm's residuals are significantly correlated with static lake descriptions in 2/12 tested scenarios, both of these scenarios involve latitude.
+
+
+<br><br><br>
+
+### Paper figure
+
+```python
+fig, ax = plt.subplots(5, 1, figsize = (12, 12))
+
+count = 0
+# different years, different lakes, different behavior
+# 264 - pretty clean behavior, lot of improvement
+# 148 - improvement but not perfect, displays two PB fall freezes
+# 331 - nearly perfect
+# 339 - moderate improvement ice on, weakened ice off
+# 99 - difficult but improved ice on, equal ice off
+
+for i in [264, 148, 331, 339, 99]:
+
+    ax[count].axhline(0.5, label = '50% prob', linestyle = '--', color = 'black')
+    ax[count].plot(test_y[i, :], label = 'Observation', linewidth = 3)
+    ax[count].plot(test_preds[i, :, 0], label = 'LSTM %')
+    ax[count].plot(test_x[i, :, ice_var_idx], label = 'Process-based')
+    ax[count].set_ylabel('Probably (or identifier)\nof ice', fontsize = 10)
+    ax[count].set_title('DOW: ' + str(test_DOW[i]) + ', Start date: ' + test_dates[i][0])
+    ax[count].set_xlim(100, 325)
+    if count == 0:
+        ax[count].legend()
+    if count == 4:
+        ax[count].set_xlabel('Days after July 1', fontsize = 12)
+    count += 1
+
+fig.tight_layout()
+
+plt.savefig('../../handpicked_test_timeseries.PNG', dpi = 300, bbox_inches = 'tight')
+```
 
 ```python
 
