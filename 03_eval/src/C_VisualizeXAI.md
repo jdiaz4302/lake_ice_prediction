@@ -61,7 +61,7 @@ massive_valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds
 
 # Not values, because they are constrained by previous notebooks
 n_eg = 50
-n_eg_fine = 30
+n_eg_fine = 50
 perm_samples = 200
 resolution = 25 # ICE
 ```
@@ -150,6 +150,10 @@ massive_valid_loss_list = np.load(massive_loss_list_fpath, allow_pickle = True)[
 assert np.sum(avg_valid_eg_IDs == massive_valid_eg_IDs) / n_eg == 1
 assert np.sum(avg_valid_eg_IDs_ice_on == massive_valid_eg_IDs_ice_on) / n_eg_fine == 1
 assert np.sum(avg_valid_eg_IDs_ice_off == massive_valid_eg_IDs_ice_off) / n_eg_fine == 1
+
+# make sure they match across EG types
+assert np.sum(avg_valid_eg_IDs == avg_valid_eg_IDs_ice_on) / n_eg == 1
+assert np.sum(avg_valid_eg_IDs == avg_valid_eg_IDs_ice_off) / n_eg == 1
 ```
 
 # Utility functions
@@ -240,6 +244,9 @@ for i in range(2):
                      rotation = 90)
     ax[i].set_ylim(0, ymax)
     ax[i].set_yticks(ax[i].get_yticks(), [str(int(100*tick))+'%' for tick in ax[i].get_yticks()])
+    
+print('\nAvg model increasing importance:\t', valid_variables[np.argsort(avg_rel_abs_attribution_by_var)], '\n\n',
+      '\nMassive model increasing importance:\t', valid_variables[np.argsort(massive_rel_abs_attribution_by_var)])
 ```
 
 The relative importance of variables is pretty similar. Both models favor the following top-3 variables:
@@ -247,7 +254,7 @@ The relative importance of variables is pretty similar. Both models favor the fo
 * process-based estimate of ice (`ice`)
 * process-based estimate of surface water temperature (`temp_0_x`)
 
-Relative ordering and magnitude of the top 5 variables looks highly agreeable except the `massive lstm` places more emphasis on `ice`, seemingly at the expense of relative humidity and wind speed.
+Relative ordering and magnitude of the top variables looks highly agreeable except the `massive lstm` places more emphasis on `ice`, seemingly at the expense of relative humidity and wind speed.
 
 
 <br><br><br><br><br>
@@ -474,9 +481,8 @@ ax[1].set_title('Massive LSTM');
 
 Both models have increased attribution to the following variables when predicting ice off:
 
-* Short wave radiation (minor/subtle for `avg`)
+* Short wave radiation
 * Long wave radiation
-* Rain (minor/subtle for `avg`)
 * Lake area
 
 Both models have increased attribution to the following variables when predicting ice on:
@@ -484,7 +490,6 @@ Both models have increased attribution to the following variables when predictin
 * Snow
 * Process-based estimate of ice
 * Max depth
-* Relative humidity (minor/subtle for `avg`)
 * Wind speed (minor/subtle for `avg`)
 
 
@@ -512,6 +517,8 @@ plt.ylabel('Areas\n(min-max scaled)')
 plt.title('Static vars associated with EGs')
 spearmanr(depths, areas)
 ```
+
+Area and depth are significantly and positively correlated in this sample
 
 ```python
 # For both model sizes and ice on/off...
@@ -557,7 +564,7 @@ for model in [avg_num_attributed_days_ice_on_ls, massive_num_attributed_days_ice
     print(spearmanr(areas, model))
 ```
 
-In this small sample and univariate inspection, the models do not appear to have correlated static variables with the amount of time steps they should effectively remember.
+In this small sample and univariate inspection, the models do not appear to have correlated static variables with the amount of time steps they effectively remember.
 
 It may be possible that a fuller inspection - more samples and accounting for differences in air temperature or latitude - may suggest otherwise.
 
@@ -591,7 +598,9 @@ for model in [avg_num_attributed_days_ice_off_ls, massive_num_attributed_days_ic
     print(spearmanr(areas, model))
 ```
 
-For ice off, null findings as well (regarding static variable effect on memory).
+Similar to ice on, memory was not generally correlated with static variables. One exception for ice off is that memory and max depth were positively and significantly correlated. This is less intuitive than if ice on was correlated with depth or if ice off was correlated with area; however, it is worth remembering that depth and area were also correlated. 
+
+Overall, the small sample and (mostly) null findings do not provide strong evidence that memory length is strongly controlled by static variables except for one subset of predictions (ice off and lake depth).
 
 
 <br><br><br><br><br>
@@ -633,7 +642,7 @@ np.mean(avg_num_attributed_days_ice_on_ls), np.mean(avg_num_attributed_days_ice_
 np.mean(massive_num_attributed_days_ice_on_ls), np.mean(massive_num_attributed_days_ice_off_ls)
 ```
 
-The `avg lstm` remembers longer for both ice on and ice off prediction relative to the `massive lstm`, but both models remember longer when predicting ice off relative to ice on; the latter difference is larger.
+The `avg lstm` remembers longer for both ice on and ice off prediction relative to the `massive lstm`, but both models remember longer when predicting ice off relative to ice on; the latter difference is more striking.
 
 
 <br><br><br><br><br>
@@ -698,7 +707,11 @@ ax[1].bar(valid_variables, 100*(np.mean(massive_permutation_results, 0) - massiv
 for i in range(2):
     ax[i].set_xticks(range(len(valid_variables)), valid_variables, rotation=75)
     ax[i].set_yticks(ax[i].get_yticks(), [str(int(tick))+'%' for tick in ax[i].get_yticks()])
-ax[0].set_ylabel('% change in RMSE when permuted', fontsize = 12);
+ax[0].set_ylabel('% change in RMSE when permuted', fontsize = 12)
+
+
+print('\nAvg model increasing importance:\t', valid_variables[np.argsort(np.mean(avg_permutation_results, 0))], '\n\n',
+      '\nMassive model increasing importance:\t', valid_variables[np.argsort(np.mean(massive_permutation_results, 0))])
 ```
 
 Permutation-based results largely agree with EG results. EG results focus on raw prediction, while permutation focuses on change in performance. 
@@ -748,7 +761,7 @@ PDP take-aways:
 1. Across variables, the models behave very similarly for >90% of the input values.
   * For the top-3 variables, the continuous valued variables highly resemble each other.
 2. The `massive lstm` does not exclusively behave wilder at extremes. The model that does display wilder behavior displays nonlinear behavior which extrapolates divergently into out-of-sample values.
-  * Notably, it does for `LakeArea` and `LongWave`
+  * Notably, it does for `LakeArea` and `LongWave`, althought `LakeArea` operates over substantially smaller changes in prediction.
   * `avg lstm` displays wilder behavior for `RelHum` and `ShortWave`
 3. These plots may demonstrate why EGs assign different attribution between models.
   * E.g., `avg lstm`s weighted `RelHum` and `WindSpeed` higher than `massive lstm`s. Likewise, the `avg lstm` assigns a slight nonlinear effect to these variables which prescribes higher probability of ice over these ~90% of their values
@@ -777,13 +790,15 @@ PDP take-aways:
 * For both models, input values occurring in the heat of summer and the dead of winter are not assigned predictive attribution.
 <br>
 
-* For both models, predicting the ice off transition assigns predictive attribution further back in time (approx 10 days more).
-  * Along these lines, the `avg lstm` remembers for longer than the `massive lstm` in both scenarios, but this is more notable for ice on prediction (6 additional days compared to 2 additional days).
-  * Notably, when predicting ice on, both models assigned higher attribution to relative humidity, wind speed, snowfall and lake depth, and when predicting ice off, both models assigned higher attribution to lake area, rainfall, and measures of incoming radiation.
+* For both models, predicting the ice off transition assigns predictive attribution further back in time ($\geq 1$ week more).
+  * Along these lines, the `avg lstm` remembers for longer than the `massive lstm` in both scenarios, but this is more notable for ice on prediction (8 additional days compared to 3 additional days).
+  * Notably, when predicting ice on, both models assigned higher attribution to relative humidity, wind speed, snowfall and lake depth, and when predicting ice off, both models assigned higher attribution to lake area and measures of incoming radiation.
 <br> 
 <br>
    
-* Static variables (area and depth) did not significantly affect the size of the attributed temporal window (where 95% of predictive attribution was assigned, unit = days). It may be possible that a larger sample or an analysis including the effect of temperature and/or latitude could find otherwise.
+* Static variables (area and depth) mostly did not significantly affect the size of the attributed temporal window (where 95% of predictive attribution was assigned, unit = days). It may be possible that a larger sample or an analysis including the effect of temperature and/or latitude could find otherwise.
+  * one exception is that deeper lakes (which were positively and signficantly correlated with larger area lakes) were positively and significantly correlated with increased memory.
+
 <br>
 
 * Across 90% of the range of input values, the models behave very similarly at high-level trend directions and shapes.
@@ -794,6 +809,114 @@ PDP take-aways:
   
 *Caveat*: PDP-approach for exploring prediction at out-of-sample input values varies one input variable at a time into new values while the others inputs are using in-sample values. This has the limitation of considering potentially unrealistic values (e.g., unrealistic combinations of rain fall and incoming radiation) and may not accurately consider how multiple variable may covary into out-of-sample space.
 <!-- #endregion -->
+
+<br><br><br>
+
+### Paper figure
+
+```python
+valid_variables
+```
+
+```python
+nice_labels = ['Air temperature', 'Process-based estimate of ice', 'Process-based estimate of \nsurface water temperature',
+               'Longwave radiation', 'Shortwave radiation', 'Relative humidity']
+
+fig, ax = plt.subplots(2, 3, figsize = (15, 10))
+
+fig.suptitle('Highlighted Partial Dependence Plots')
+
+count = 0
+for var_index in [2, 7, 8, 1, 0, 3]:
+    
+    if count < 3:
+        i = 0
+        j = count
+    else:
+        i = 1
+        j = count - 3
+    
+    var_min = avg_min_max_scalars[var_index, 0].item()
+    var_max = avg_min_max_scalars[var_index, 1].item()
+    var_name = valid_variables[var_index]
+    if var_name in ['MaxDepth', 'LakeArea']:
+        var_name = 'log ' + var_name
+    
+    unscale_factor = var_max - var_min
+    
+    ax[i, j].plot(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+             # reshape lumps all lakes and times together by variable
+             np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
+    ax[i, j].scatter(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'avg lstm')
+    ax[i, j].plot(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
+    ax[i, j].scatter(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'massive lstm')
+    if j == 0:
+        ax[i, j].set_ylabel('Probability of Ice Cover')
+    #ax[i, j].set_ylim(0, 1)
+    ax[i, j].set_xlabel(nice_labels[count])
+    ax[i, j].axvline(var_min, color = 'grey', linestyle = '--', label = 'training limit')
+    ax[i, j].axvline(var_max, color = 'grey', linestyle = '--')
+    if i == 0 and j == 1:
+        ax[i, j].legend()
+    count += 1
+    
+plt.savefig('../../highlighted_PDPs.PNG', dpi = 300, bbox_inches = 'tight')
+```
+
+```python
+nice_labels = ['Air temperature', 'Process-based estimate of ice', 'Process-based estimate of \nsurface water temperature',
+               'Longwave radiation', 'Shortwave radiation', 'Relative humidity']
+
+fig, ax = plt.subplots(2, 3, figsize = (15, 10))
+
+fig.suptitle('Highlighted Partial Dependence Plots')
+
+count = 0
+for var_index in [2, 7, 8, 1, 0, 3]:
+    
+    if count < 3:
+        i = 0
+        j = count
+    else:
+        i = 1
+        j = count - 3
+    
+    var_min = avg_min_max_scalars[var_index, 0].item()
+    var_max = avg_min_max_scalars[var_index, 1].item()
+    var_name = valid_variables[var_index]
+    if var_name in ['MaxDepth', 'LakeArea']:
+        var_name = 'log ' + var_name
+    
+    unscale_factor = var_max - var_min
+    
+    ax[i, j].plot(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+             # reshape lumps all lakes and times together by variable
+             np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
+    ax[i, j].scatter(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'avg lstm')
+    ax[i, j].plot(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
+    ax[i, j].scatter(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'massive lstm')
+    if j == 0:
+        ax[i, j].set_ylabel('Probability of Ice Cover')
+    ax[i, j].set_ylim(0, 1)
+    ax[i, j].set_xlabel(nice_labels[count])
+    ax[i, j].axvline(var_min, color = 'grey', linestyle = '--', label = 'training limit')
+    ax[i, j].axvline(var_max, color = 'grey', linestyle = '--')
+    if i == 0 and j == 1:
+        ax[i, j].legend()
+    count += 1
+    
+plt.savefig('../../highlighted_PDPs_fullYaxis.PNG', dpi = 300, bbox_inches = 'tight')
+```
 
 ```python
 
