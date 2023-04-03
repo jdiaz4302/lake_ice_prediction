@@ -341,8 +341,6 @@ all_pred_ice_on = np.zeros([n_compare, valid_n]).astype(str)
 all_pred_ice_off = np.zeros([n_compare, valid_n]).astype(str)
 
 for i in range(n_compare):
-    # 11 never predicts about 0.5
-    # 13 never predicts melt
     if remove_PB and i in bad_remove_PB_indices:
         continue
     else:
@@ -639,7 +637,7 @@ for i in range(len(plt_objects['medians'])):
 plt.xticks(range(1, len(titles)+1), titles);
 ```
 
-The best `massive lstm` performed best, but `massive lstm`s, in general, were a less reliable training set up. Desirable this unreliability across seeds, the best `massive lstm` was the best in 2/3 date-based performance categories (ice off and ice duration); it was near-best on ice on prediction too.
+The best `massive lstm` performed best, but `massive lstm`s, in general, were a less reliable training set up. Despite this unreliability across seeds, the best `massive lstm` was the best in 2/3 date-based performance categories (ice off and ice duration); it was near-best on ice on prediction too.
 
 The 2nd best model was an `avg lstm`. This set up is common and was more consistent than the `massive lstm`s.
 
