@@ -17,7 +17,7 @@ jupyter:
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import OrderedDict
-import pandas as pd
+import pandas as pd 
 from sklearn.metrics import r2_score
 ```
 
@@ -27,12 +27,19 @@ from sklearn.metrics import r2_score
 ### Inputs
 
 ```python
-process_out_dir = '../../01_process/out/'
-train_out_dir = '../../02_train/out/'
+process_out_dir = '01_process/out/'
+train_out_dir = '02_train/out/'
 
 # data, primarily for the ice flags
 train_data_fpath = process_out_dir + 'train_data.npz'
 valid_data_fpath = process_out_dir + 'valid_data.npz'
+```
+
+```python
+extended_dir = '/caldera/projects/usgs/water/iidd/datasci/lake-temp/lake_ice_prediction/'
+
+train_data_fpath = extended_dir + train_data_fpath
+valid_data_fpath = extended_dir + valid_data_fpath
 ```
 
 ### Values
@@ -71,14 +78,26 @@ color_dict = {'avg lstm':'#1b9e77',
               'large transformer':'#e7298a',
               'process-based':'#a6761d',
               'massive transformer':'#e6ab02',}
+
+# remove process-based or not
+remove_PB = True
+# this corresponds to some known indices (dependent on data assembly steps)
+# of bad model performance to remove because they complicate analysis
+# 11 never predicts freeze
+# 13 predicts freeze but never predicts thaw
+bad_remove_PB_indices = [11, 13]
 ```
 
 ### Outputs
 
 ```python
 # Fragile: prepare to change if new results; this is a little qualitative atm so not automated
-second_best_eval_metrics_fpath = '../out/avg_lstm_eval_metrics_3_.npz'
-best_eval_metrics_fpath = '../out/massive_lstm_eval_metrics_1_.npz'
+if remove_PB:
+    second_best_eval_metrics_fpath = '../out/avg_lstm_eval_metrics_4_NoProcessBasedInput_.npz'
+    best_eval_metrics_fpath = '../out/massive_lstm_eval_metrics_0_NoProcessBasedInput_.npz'
+else:
+    second_best_eval_metrics_fpath = '../out/avg_lstm_eval_metrics_3_.npz'
+    best_eval_metrics_fpath = '../out/massive_lstm_eval_metrics_1_.npz'
 ```
 
 # Import data
@@ -125,9 +144,14 @@ for model_type in model_names:
             model_init_ls.append(i)
             
             # construct the filepaths for both partition's predictions and the associated loss curves
-            train_pred_file = train_out_dir + model_size + '_' + model_type + '_train_preds_' + str(i) + '_.npy'
-            valid_pred_file = train_out_dir + model_size + '_' + model_type + '_valid_preds_' + str(i) + '_.npy'
-            loss_file = train_out_dir + model_size + '_' + model_type + '_loss_lists_' + str(i) + '_.npz'
+            if remove_PB:
+                train_pred_file = extended_dir + train_out_dir + model_size + '_' + model_type + '_train_preds_' + str(i) + '_NoProcessBasedInput_.npy'
+                valid_pred_file = extended_dir + train_out_dir + model_size + '_' + model_type + '_valid_preds_' + str(i) + '_NoProcessBasedInput_.npy'
+                loss_file = extended_dir + train_out_dir + model_size + '_' + model_type + '_loss_lists_' + str(i) + '_NoProcessBasedInput_.npz'
+            else:
+                train_pred_file = extended_dir + train_out_dir + model_size + '_' + model_type + '_train_preds_' + str(i) + '_.npy'
+                valid_pred_file = extended_dir + train_out_dir + model_size + '_' + model_type + '_valid_preds_' + str(i) + '_.npy'
+                loss_file = extended_dir + train_out_dir + model_size + '_' + model_type + '_loss_lists_' + str(i) + '_.npz'      
             
             # load
             train_predictions = np.load(train_pred_file)
@@ -309,7 +333,7 @@ objects = extract_date_i_and_date(valid_x[:, :, ice_var_idx], valid_dates)
 flag_ice_on_ids, flag_ice_off_ids, flag_ice_on, flag_ice_off = objects
 ```
 
-```python
+```python tags=[]
 # get important dates and date-indices for all models
 all_pred_ice_on_ids = np.zeros([n_compare, valid_n])
 all_pred_ice_off_ids = np.zeros([n_compare, valid_n])
@@ -317,13 +341,16 @@ all_pred_ice_on = np.zeros([n_compare, valid_n]).astype(str)
 all_pred_ice_off = np.zeros([n_compare, valid_n]).astype(str)
 
 for i in range(n_compare):
-    objects = extract_date_i_and_date(all_valid_predictions_class[i, :, :, 0], valid_dates)
-    pred_ice_on_ids, pred_ice_off_ids, pred_ice_on, pred_ice_off = objects
-    
-    all_pred_ice_on_ids[i] = pred_ice_on_ids
-    all_pred_ice_off_ids[i] = pred_ice_off_ids
-    all_pred_ice_on[i] = pred_ice_on
-    all_pred_ice_off[i] = pred_ice_off
+    if remove_PB and i in bad_remove_PB_indices:
+        continue
+    else:
+        objects = extract_date_i_and_date(all_valid_predictions_class[i, :, :, 0], valid_dates)
+        pred_ice_on_ids, pred_ice_off_ids, pred_ice_on, pred_ice_off = objects
+
+        all_pred_ice_on_ids[i] = pred_ice_on_ids
+        all_pred_ice_off_ids[i] = pred_ice_off_ids
+        all_pred_ice_on[i] = pred_ice_on
+        all_pred_ice_off[i] = pred_ice_off
 ```
 
 ### Define some functions to deal with those dates
@@ -352,9 +379,13 @@ def calc_rmse(errors):
 ```python
 # calculate all errors: obs - pred
 all_pred_ice_on_error = np.zeros([n_compare, valid_n])
+all_pred_ice_on_error[:] = np.nan
 
 for i in range(n_compare):
-    all_pred_ice_on_error[i] = calc_date_errors(all_pred_ice_on[i], obs_ice_on)
+    if remove_PB and i in bad_remove_PB_indices:
+        continue
+    else:
+        all_pred_ice_on_error[i] = calc_date_errors(all_pred_ice_on[i], obs_ice_on)
     
 # PB flag
 flag_ice_on_error = calc_date_errors(flag_ice_on, obs_ice_on)
@@ -402,9 +433,13 @@ eval_df['ice_on_rmse'] = ice_on_rmse
 ```python
 # calculate all errors: obs - pred
 all_pred_ice_off_error = np.zeros([n_compare, valid_n])
+all_pred_ice_off_error[:] = np.nan
 
 for i in range(n_compare):
-    all_pred_ice_off_error[i] = calc_date_errors(all_pred_ice_off[i], obs_ice_off)
+    if remove_PB and i in bad_remove_PB_indices:
+        continue
+    else:
+        all_pred_ice_off_error[i] = calc_date_errors(all_pred_ice_off[i], obs_ice_off)
     
 # PB flag
 flag_ice_off_error = calc_date_errors(flag_ice_off, obs_ice_off)
@@ -435,12 +470,15 @@ ice_off_avg_error = []
 ice_off_rmse = []
 
 for i in range(n_compare):
-    
-    avg_error = np.mean(all_pred_ice_off_error[i])
-    rmse = calc_rmse(all_pred_ice_off_error[i])
-    
-    ice_off_avg_error.append(avg_error)
-    ice_off_rmse.append(rmse)
+    if remove_PB and i in bad_remove_PB_indices:
+        ice_off_avg_error.append(np.nan)
+        ice_off_rmse.append(np.nan)
+    else:
+        avg_error = np.mean(all_pred_ice_off_error[i])
+        rmse = calc_rmse(all_pred_ice_off_error[i])
+
+        ice_off_avg_error.append(avg_error)
+        ice_off_rmse.append(rmse)
     
 # store in dataframe
 eval_df['ice_off_avg_error'] = ice_off_avg_error
@@ -461,16 +499,19 @@ ice_dur_avg_error = []
 ice_dur_rmse = []
 
 for i in range(n_compare):
-    
-    obs_dur = calc_ice_duration(obs_ice_off, obs_ice_on)
-    pred_dur = calc_ice_duration(all_pred_ice_off[i], all_pred_ice_on[i])
+    if remove_PB and i in bad_remove_PB_indices:
+        ice_dur_avg_error.append(np.nan)
+        ice_dur_rmse.append(np.nan)
+    else:
+        obs_dur = calc_ice_duration(obs_ice_off, obs_ice_on)
+        pred_dur = calc_ice_duration(all_pred_ice_off[i], all_pred_ice_on[i])
 
-    # error
-    pred_error_dur = obs_dur - pred_dur
-    
-    # average error and rmse
-    ice_dur_avg_error.append(np.mean(pred_error_dur))
-    ice_dur_rmse.append(calc_rmse(pred_error_dur))
+        # error
+        pred_error_dur = obs_dur - pred_dur
+
+        # average error and rmse
+        ice_dur_avg_error.append(np.mean(pred_error_dur))
+        ice_dur_rmse.append(calc_rmse(pred_error_dur))
     
 # PB ice flag
 flag_dur = calc_ice_duration(flag_ice_off, flag_ice_on)
@@ -540,7 +581,7 @@ avg_rmse_change_df['large lstm'] = eval_df[eval_df['name'] == 'large lstm']['avg
 avg_rmse_change_df['massive lstm'] = eval_df[eval_df['name'] == 'massive lstm']['avg_rmse_change'].astype(float).values
 avg_rmse_change_df['avg transformer'] = eval_df[eval_df['name'] == 'avg transformer']['avg_rmse_change'].astype(float).values
 avg_rmse_change_df['large transformer'] = eval_df[eval_df['name'] == 'large transformer']['avg_rmse_change'].astype(float).values
-
+avg_rmse_change_df = 100*avg_rmse_change_df
 
 # Start plotting
 plt.figure(figsize = (6, 6))
@@ -562,22 +603,24 @@ for i in range(n_compare):
     if cur_name != last_name:
         count += 1
         last_name = eval_df['name'][i]
-    plt.scatter(count, eval_df['avg_rmse_change'][i], color = color_dict[eval_df['name'][i]])
+    plt.scatter(count, eval_df['avg_rmse_change'][i]*100, color = color_dict[eval_df['name'][i]])
     
 # extra formatting
 plt.ylabel('Change in RMSE (%)\nRelative to Process-Based RMSE')
 plt.title('Average Change in Date-based Performance:\nIce on, Ice off, Ice Duration')
 plt.xticks(range(1,6), focal_models, rotation = 45)
-plt.savefig('../../overall_model_comparison.PNG', dpi = 300, bbox_inches = 'tight')
+#plt.savefig('../../overall_model_comparison.PNG', dpi = 300, bbox_inches = 'tight')
 ```
 
 ```python
-per_date_based_improvement = (rmse_df.iloc[:-1].values - rmse_pb.values) / rmse_pb.values
+# subsetting keeps NAs
+per_date_based_improvement = 100*((rmse_df.iloc[:-1].values - rmse_pb.values) / rmse_pb.values)
 titles = ['Ice on', 'Ice off', 'Ice duration']
 
 plt.figure(figsize = (6, 6))
 
-plt_objects = plt.boxplot(per_date_based_improvement)
+# remove NAs before boxplotting, ASSUMES: NA are consistent across columns. Plot will fail if this assumption fails.
+plt_objects = plt.boxplot(per_date_based_improvement[~np.isnan(per_date_based_improvement[:, 0])])
 plt.axhline(0, color = 'gray', linestyle = '--')
 plt.scatter(range(1, len(titles)+1), per_date_based_improvement[best_i],
             color = color_dict[eval_df['name'][best_i]], marker = 'x',
@@ -585,15 +628,16 @@ plt.scatter(range(1, len(titles)+1), per_date_based_improvement[best_i],
 plt.legend()
 plt.ylabel('Change in RMSE (%)\nRelatiuve to Process-based RMSE')
 
-print("\nMedian improvement\t Best model's improvement")
+print("\nMedian improvement\t Best improvement\tChosen model's improvement")
 for i in range(len(plt_objects['medians'])):
     print(plt_objects['medians'][i].get_xydata()[0, 1], '\t',
+          np.nanmin(per_date_based_improvement[:, i]), '\t',
           per_date_based_improvement[best_i, i])
 
 plt.xticks(range(1, len(titles)+1), titles);
 ```
 
-The best `massive lstm` performed best, but `massive lstm`s, in general, were a less reliable training set up.
+The best `massive lstm` performed best, but `massive lstm`s, in general, were a less reliable training set up. Despite this unreliability across seeds, the best `massive lstm` was the best in 2/3 date-based performance categories (ice off and ice duration); it was near-best on ice on prediction too.
 
 The 2nd best model was an `avg lstm`. This set up is common and was more consistent than the `massive lstm`s.
 

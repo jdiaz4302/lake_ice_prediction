@@ -67,6 +67,9 @@ pin_memory = True # supposedly faster for CPU->GPU transfers
 
 # training hyperparams
 early_stop_patience = 50
+
+# remove process-based or not
+remove_PB = True
 ```
 
 ### Outputs
@@ -75,11 +78,18 @@ early_stop_patience = 50
 train_out_dir = '02_train/out/'
 
 # note that file names are adjusted with seed value
-data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_' + str(random_seed) + '_.pt'
-model_weights_fpath = train_out_dir + 'massive_lstm_weights_' + str(random_seed) + '_.pth'
-train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_' + str(random_seed) + '_.npy'
-valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_' + str(random_seed) + '_.npy'
-loss_lists_fpath = train_out_dir + 'massive_lstm_loss_lists_' + str(random_seed) + '_.npz'
+if remove_PB:
+    data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_' + str(random_seed) + '_NoProcessBasedInput_.pt'
+    model_weights_fpath = train_out_dir + 'massive_lstm_weights_' + str(random_seed) + '_NoProcessBasedInput_.pth'
+    train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_' + str(random_seed) + '_NoProcessBasedInput_.npy'
+    valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_' + str(random_seed) + '_NoProcessBasedInput_.npy'
+    loss_lists_fpath = train_out_dir + 'massive_lstm_loss_lists_' + str(random_seed) + '_NoProcessBasedInput_.npz'
+else:
+    data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_' + str(random_seed) + '_.pt'
+    model_weights_fpath = train_out_dir + 'massive_lstm_weights_' + str(random_seed) + '_.pth'
+    train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_' + str(random_seed) + '_.npy'
+    valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_' + str(random_seed) + '_.npy'
+    loss_lists_fpath = train_out_dir + 'massive_lstm_loss_lists_' + str(random_seed) + '_.npz'
 ```
 
 ```python
@@ -111,6 +121,32 @@ valid_y = valid_data['y']
 valid_dates = valid_data['dates']
 valid_DOW = valid_data['DOW']
 valid_variables = valid_data['features']
+```
+
+```python
+# Remove the process-based estimate if desired
+if remove_PB:
+    # remove estimate of ice
+    train_ice_loc = np.argwhere(train_variables == 'ice').item()
+    valid_ice_loc = np.argwhere(valid_variables == 'ice').item()
+    assert train_ice_loc == valid_ice_loc
+    train_x = np.delete(train_x, train_ice_loc, -1)
+    valid_x = np.delete(valid_x, train_ice_loc, -1)
+    train_variables = np.delete(train_variables, train_ice_loc)
+    valid_variables = np.delete(valid_variables, train_ice_loc)
+    
+    
+    # remove estimate of surface water temp
+    train_temp_0_x_loc = np.argwhere(train_variables == 'temp_0_x').item()
+    valid_temp_0_x_loc = np.argwhere(valid_variables == 'temp_0_x').item()
+    assert train_temp_0_x_loc == valid_temp_0_x_loc
+    train_x = np.delete(train_x, train_temp_0_x_loc, -1)
+    valid_x = np.delete(valid_x, train_temp_0_x_loc, -1)
+    train_variables = np.delete(train_variables, train_temp_0_x_loc)
+    valid_variables = np.delete(valid_variables, train_temp_0_x_loc)
+    
+else:
+    print('Keeping proces-based estimate')
 ```
 
 # Prepare data for `torch`
