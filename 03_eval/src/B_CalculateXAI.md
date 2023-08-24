@@ -37,7 +37,7 @@ data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_3_.pt'
 model_weights_fpath = train_out_dir + 'avg_lstm_weights_3_.pth'
 <!-- #endraw -->
 
-```python
+<!-- #raw -->
 # OR THIS
 process_out_dir = '01_process/out/'
 
@@ -48,6 +48,32 @@ train_out_dir = '02_train/out/'
 
 data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_1_.pt'
 model_weights_fpath = train_out_dir + 'massive_lstm_weights_1_.pth'
+<!-- #endraw -->
+
+<!-- #raw -->
+# OR THIS
+process_out_dir = '01_process/out/'
+
+train_data_fpath = process_out_dir + 'train_data.npz'
+valid_data_fpath = process_out_dir + 'valid_data.npz'
+
+train_out_dir = '02_train/out/'
+
+data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_4_NoProcessBasedInput_.pt'
+model_weights_fpath = train_out_dir + 'avg_lstm_weights_4_NoProcessBasedInput_.pth'
+<!-- #endraw -->
+
+```python
+# OR THIS
+process_out_dir = '01_process/out/'
+
+train_data_fpath = process_out_dir + 'train_data.npz'
+valid_data_fpath = process_out_dir + 'valid_data.npz'
+
+train_out_dir = '02_train/out/'
+
+data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_0_NoProcessBasedInput_.pt'
+model_weights_fpath = train_out_dir + 'massive_lstm_weights_0_NoProcessBasedInput_.pth'
 ```
 
 ```python
@@ -62,7 +88,6 @@ model_weights_fpath = extended_dir + model_weights_fpath
 ### Values
 
 ```python
-# Model hyperparams
 if 'massive_lstm' in data_scalars_fpath:
     params = 18920961 # matching the full size, encoder only, transformer
     model_dim = int(np.round((1/88)*(np.sqrt(176*params + 4585) - 69))) # assumes 11 variables 
@@ -107,6 +132,9 @@ vars_to_cap_at_0 = ['ShortWave', 'LongWave', 'RelHum', 'WindSpeed', 'Rain',
                     'Snow', 'ice']
 vars_to_cap_at_1 = ['ice']
 vars_to_cap_at_100 = ['RelHum']
+
+# remove process-based or not
+remove_PB = True
 ```
 
 ### Outputs
@@ -125,7 +153,7 @@ valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_3_.npy'
 valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_3_.npy'
 <!-- #endraw -->
 
-```python
+<!-- #raw -->
 # OR THIS
 eval_out_dir = '03_eval/out/'
 
@@ -137,6 +165,34 @@ valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_1
 
 valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_1_.npy'
 valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_1_.npy'
+<!-- #endraw -->
+
+<!-- #raw -->
+# USE THIS
+eval_out_dir = '03_eval/out/'
+
+rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_4_NoProcessBasedInput_.npz'
+rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_4_NoProcessBasedInput_.npz'
+rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_4_NoProcessBasedInput_.npz'
+
+valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_4_NoProcessBasedInput_.npy'
+
+valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_4_NoProcessBasedInput_.npy'
+valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_4_NoProcessBasedInput_.npy'
+<!-- #endraw -->
+
+```python
+# OR THIS
+eval_out_dir = '03_eval/out/'
+
+rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_0_NoProcessBasedInput_.npz'
+rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_0_NoProcessBasedInput_.npz'
+rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_0_NoProcessBasedInput_.npz'
+
+valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_0_NoProcessBasedInput_.npy'
+
+valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_0_NoProcessBasedInput_.npy'
+valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_0_NoProcessBasedInput_.npy'
 ```
 
 ```python
@@ -162,9 +218,15 @@ files = [data_scalars_fpath, model_weights_fpath,
 # extract their specified size and seed value
 file_model_sizes = []
 file_model_seeds = []
-for file in files:
-    file_model_sizes.append(file.split('_')[3].split('/')[-1])
-    file_model_seeds.append(file.split('_')[-2])
+if remove_PB:
+    for file in files:
+        file_model_sizes.append(files[0].split("/")[-1].split("_")[0])
+        file_model_seeds.append(file.split('_')[-3])
+        
+else:
+    for file in files:
+        file_model_sizes.append(file.split('_')[3].split('/')[-1])
+        file_model_seeds.append(file.split('_')[-2])
     
 # make sure only 1 unique size and seed exists among files
 assert len(np.unique(np.asarray(file_model_sizes))) == 1
@@ -180,12 +242,39 @@ valid_data = np.load(valid_data_fpath, allow_pickle = True)
 
 ```python
 train_x = train_data['x']
+train_variables = train_data['features']
 ```
 
 ```python
 valid_x = valid_data['x']
 valid_y = valid_data['y']
 valid_variables = valid_data['features']
+```
+
+```python
+# Remove the process-based estimate if desired
+if remove_PB:
+    # remove estimate of ice
+    train_ice_loc = np.argwhere(train_variables == 'ice').item()
+    valid_ice_loc = np.argwhere(valid_variables == 'ice').item()
+    assert train_ice_loc == valid_ice_loc
+    train_x = np.delete(train_x, train_ice_loc, -1)
+    valid_x = np.delete(valid_x, train_ice_loc, -1)
+    train_variables = np.delete(train_variables, train_ice_loc)
+    valid_variables = np.delete(valid_variables, train_ice_loc)
+    
+    
+    # remove estimate of surface water temp
+    train_temp_0_x_loc = np.argwhere(train_variables == 'temp_0_x').item()
+    valid_temp_0_x_loc = np.argwhere(valid_variables == 'temp_0_x').item()
+    assert train_temp_0_x_loc == valid_temp_0_x_loc
+    train_x = np.delete(train_x, train_temp_0_x_loc, -1)
+    valid_x = np.delete(valid_x, train_temp_0_x_loc, -1)
+    train_variables = np.delete(train_variables, train_temp_0_x_loc)
+    valid_variables = np.delete(valid_variables, train_temp_0_x_loc)
+    
+else:
+    print('Keeping proces-based estimate')
 ```
 
 # Scale and format data

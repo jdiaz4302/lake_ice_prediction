@@ -32,31 +32,57 @@ valid_data_fpath = process_out_dir + 'valid_data.npz'
 
 train_out_dir = '../../02_train/out/'
 
-# we'll rescale data to compare it to training domain
-avg_data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_3_.pt'
-massive_data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_1_.pt'
-# loss lists for scaling permutation results
-avg_loss_list_fpath = train_out_dir + 'avg_lstm_loss_lists_3_.npz'
-massive_loss_list_fpath = train_out_dir + 'massive_lstm_loss_lists_1_.npz'
-
-
 eval_out_dir = '../../03_eval/out/'
 
-# best avg lstm
-avg_rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_3_.npz'
-avg_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_3_.npz'
-avg_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_3_.npz'
-avg_valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_3_.npy'
-avg_valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_3_.npy'
-avg_valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_3_.npy'
+remove_PB = True
 
-# best massive lstm
-massive_rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_1_.npz'
-massive_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_1_.npz'
-massive_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_1_.npz'
-massive_valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_1_.npy'
-massive_valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_1_.npy'
-massive_valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_1_.npy'
+if remove_PB:
+    # we'll rescale data to compare it to training domain
+    avg_data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_4_NoProcessBasedInput_.pt'
+    massive_data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_0_NoProcessBasedInput_.pt'
+    # loss lists for scaling permutation results
+    avg_loss_list_fpath = train_out_dir + 'avg_lstm_loss_lists_4_NoProcessBasedInput_.npz'
+    massive_loss_list_fpath = train_out_dir + 'massive_lstm_loss_lists_0_NoProcessBasedInput_.npz'
+
+    # best avg lstm
+    avg_rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_4_NoProcessBasedInput_.npz'
+    avg_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_4_NoProcessBasedInput_.npz'
+    avg_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_4_NoProcessBasedInput_.npz'
+    avg_valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_4_NoProcessBasedInput_.npy'
+    avg_valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_4_NoProcessBasedInput_.npy'
+    avg_valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_4_NoProcessBasedInput_.npy'
+
+    # best massive lstm
+    massive_rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_0_NoProcessBasedInput_.npz'
+    massive_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_0_NoProcessBasedInput_.npz'
+    massive_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_0_NoProcessBasedInput_.npz'
+    massive_valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_0_NoProcessBasedInput_.npy'
+    massive_valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_0_NoProcessBasedInput_.npy'
+    massive_valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_0_NoProcessBasedInput_.npy'
+    
+else:
+    # we'll rescale data to compare it to training domain
+    avg_data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_3_.pt'
+    massive_data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_1_.pt'
+    # loss lists for scaling permutation results
+    avg_loss_list_fpath = train_out_dir + 'avg_lstm_loss_lists_3_.npz'
+    massive_loss_list_fpath = train_out_dir + 'massive_lstm_loss_lists_1_.npz'
+
+    # best avg lstm
+    avg_rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_3_.npz'
+    avg_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_3_.npz'
+    avg_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_3_.npz'
+    avg_valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_3_.npy'
+    avg_valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_3_.npy'
+    avg_valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_3_.npy'
+
+    # best massive lstm
+    massive_rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_1_.npz'
+    massive_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_1_.npz'
+    massive_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_1_.npz'
+    massive_valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_1_.npy'
+    massive_valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_1_.npy'
+    massive_valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_1_.npy'
 
 
 # Not values, because they are constrained by previous notebooks
@@ -87,6 +113,24 @@ valid_x = valid_data['x']
 valid_dates = valid_data['dates']
 valid_DOW = valid_data['DOW'] # Minnesota lake identifier
 valid_variables = valid_data['features']
+```
+
+```python
+# Remove the process-based estimate if desired
+if remove_PB:
+    # remove estimate of ice
+    valid_ice_loc = np.argwhere(valid_variables == 'ice').item()
+    valid_x = np.delete(valid_x, valid_ice_loc, -1)
+    valid_variables = np.delete(valid_variables, valid_ice_loc)
+    
+    
+    # remove estimate of surface water temp
+    valid_temp_0_x_loc = np.argwhere(valid_variables == 'temp_0_x').item()
+    valid_x = np.delete(valid_x, valid_temp_0_x_loc, -1)
+    valid_variables = np.delete(valid_variables, valid_temp_0_x_loc)
+    
+else:
+    print('Keeping proces-based estimate')
 ```
 
 ```python
@@ -249,12 +293,23 @@ print('\nAvg model increasing importance:\t', valid_variables[np.argsort(avg_rel
       '\nMassive model increasing importance:\t', valid_variables[np.argsort(massive_rel_abs_attribution_by_var)])
 ```
 
+##### When using process-based inputs
+
 The relative importance of variables is pretty similar. Both models favor the following top-3 variables:
 * air temperature
 * process-based estimate of ice (`ice`)
 * process-based estimate of surface water temperature (`temp_0_x`)
 
 Relative ordering and magnitude of the top variables looks highly agreeable except the `massive lstm` places more emphasis on `ice`, seemingly at the expense of relative humidity and wind speed.
+
+##### When NOT using process-based inputs
+
+The relative importance of variables is pretty similar. Both models favor the following top-3 variables:
+* air temperature
+* longwave radiation
+* shortwave radiation
+
+Overall, the relative ordering and magnitude is highly agreeable. The most significant difference is that the massive LSTM more heavily emphasizes `AirTemp` at the expense of `LongWave` and `ShortWave`
 
 
 <br><br><br><br><br>
@@ -296,7 +351,13 @@ for i in range(5):
     fig.suptitle('DOW = ' + rand_dow + ", " + rand_start_date + ' thru ' + rand_end_date)
 ```
 
+##### When using process-based inputs
+
 Attributions are largely not occurring outside transition periods. That is, no attributions during the heat of summer or the dead of winter.
+
+##### When NOT using process-based inputs
+
+Attributes are smaller magnitude but still active outside transition periods. That is, attributions do occur during the dead of winter (but not the heat of summer)
 
 
 <br><br><br><br><br>
@@ -375,8 +436,16 @@ for i in range(5):
     fig.legend(bbox_to_anchor = (1.05, 1))
 ```
 
+<!-- #region -->
+##### When using process-based inputs
+
 Compared to ice on prediction, ice off prediction appears to utilize more variables
 
+##### When NOT using process-based inputs
+
+
+Compared to ice on prediction, ice off prediction appears to utilize more variables and longer memory
+<!-- #endregion -->
 
 <br><br><br><br><br>
 
@@ -479,6 +548,9 @@ ax[0].set_title('Average-sized LSTM')
 ax[1].set_title('Massive LSTM');
 ```
 
+<!-- #region -->
+##### When using process-based inputs
+
 Both models have increased attribution to the following variables when predicting ice off:
 
 * Short wave radiation
@@ -492,6 +564,23 @@ Both models have increased attribution to the following variables when predictin
 * Max depth
 * Wind speed (minor/subtle for `avg`)
 
+##### When NOT using process-based inputs
+
+
+Both models have increased attribution to the following variables when predicting ice off:
+
+* Short wave radiation
+* Long wave radiation
+* Air temperature (minor/subtle for `massive`)
+* Lake area (minor/subtle for `massive`)
+
+Both models have increased attribution to the following variables when predicting ice on:
+
+* Wind speed
+* Max depth
+* Relative humidity 
+* Snow (minor/subtle for `massive`)
+<!-- #endregion -->
 
 <br><br><br><br><br>
 
@@ -564,9 +653,15 @@ for model in [avg_num_attributed_days_ice_on_ls, massive_num_attributed_days_ice
     print(spearmanr(areas, model))
 ```
 
+##### When using process-based inputs
+
 In this small sample and univariate inspection, the models do not appear to have correlated static variables with the amount of time steps they effectively remember.
 
 It may be possible that a fuller inspection - more samples and accounting for differences in air temperature or latitude - may suggest otherwise.
+
+##### When NOT using process-based inputs
+
+Here, we see that the amount of time steps that are effectively remembered are singificantly correlated with max depth, but different models identify opposing patterns. The `massive` model remembers more for deeper lakes while `avg` models remember less for deeper lakes. The difference is largest for shallower lakes, where the `avg` model assigns relatively long memory. This is perhaps bad - in favor of the `massive` model
 
 
 <br><br><br><br><br>
@@ -598,9 +693,15 @@ for model in [avg_num_attributed_days_ice_off_ls, massive_num_attributed_days_ic
     print(spearmanr(areas, model))
 ```
 
+##### When using process-based inputs
+
 Similar to ice on, memory was not generally correlated with static variables. One exception for ice off is that memory and max depth were positively and significantly correlated. This is less intuitive than if ice on was correlated with depth or if ice off was correlated with area; however, it is worth remembering that depth and area were also correlated. 
 
 Overall, the small sample and (mostly) null findings do not provide strong evidence that memory length is strongly controlled by static variables except for one subset of predictions (ice off and lake depth).
+
+##### When NOT using process-based inputs
+
+We find that both models see signficant and positive correlations with both static attributes. This is perhaps good/intuitive because a larger body of water should have more inertia
 
 
 <br><br><br><br><br>
@@ -642,7 +743,13 @@ np.mean(avg_num_attributed_days_ice_on_ls), np.mean(avg_num_attributed_days_ice_
 np.mean(massive_num_attributed_days_ice_on_ls), np.mean(massive_num_attributed_days_ice_off_ls)
 ```
 
+##### When using process-based inputs
+
 The `avg lstm` remembers longer for both ice on and ice off prediction relative to the `massive lstm`, but both models remember longer when predicting ice off relative to ice on; the latter difference is more striking.
+
+##### When NOT using process-based inputs
+
+The `avg lstm` remembers longer for both ice on and ice off prediction relative to the `massive lstm`, but both models remember longer when predicting ice off relative to ice on; the latter difference is very striking and more variable.
 
 
 <br><br><br><br><br>
@@ -714,10 +821,20 @@ print('\nAvg model increasing importance:\t', valid_variables[np.argsort(np.mean
       '\nMassive model increasing importance:\t', valid_variables[np.argsort(np.mean(massive_permutation_results, 0))])
 ```
 
+<!-- #region -->
+##### When using process-based inputs
+
 Permutation-based results largely agree with EG results. EG results focus on raw prediction, while permutation focuses on change in performance. 
 
 Permutation results more greatly emphasize the importance of the top-3 variables
 
+##### When NOT using process-based inputs
+
+
+Permutation-based mostly largely agree with EG results. EG results focus on raw prediction, while permutation focuses on change in performance. 
+
+Permutation results much more greatly emphasize max depth at the expense of incoming radiation.
+<!-- #endregion -->
 
 <br><br><br><br><br>
 
@@ -758,6 +875,9 @@ for var_index in range(len(valid_variables)):
 ```
 
 PDP take-aways:
+
+##### When using process-based inputs
+
 1. Across variables, the models behave very similarly for >90% of the input values.
   * For the top-3 variables, the continuous valued variables highly resemble each other.
 2. The `massive lstm` does not exclusively behave wilder at extremes. The model that does display wilder behavior displays nonlinear behavior which extrapolates divergently into out-of-sample values.
@@ -766,10 +886,24 @@ PDP take-aways:
 3. These plots may demonstrate why EGs assign different attribution between models.
   * E.g., `avg lstm`s weighted `RelHum` and `WindSpeed` higher than `massive lstm`s. Likewise, the `avg lstm` assigns a slight nonlinear effect to these variables which prescribes higher probability of ice over these ~90% of their values
 
+##### When NOT using process-based inputs
+
+1. The models can learn noticeably different and even opposing patterns (e.g., positive vs negative; linear vs nonlinear)
+2. Behavior at the extremes:
+  * The `massive` lstm behaves wilder at the extremes for `LakeArea`
+  * The `avg` lstm behaves wilder at the extremes for `MaxDepth` and `RelHum`
+    * These values operate over larger changes in % of ice
+  * Others are too different or plausible to speak on
+3. These plot helps illustrate the difference in EG magnitudes for the top 3 variables. The `massive` model more greatly relies on `AirTemp` and assigns it a stronger threshold effect while assigned the radiation variables more linear effects. These three values are correlated and this ultimately likely means very little.
+
+
+
 <!-- #region -->
 <br><br><br><br><br>
 
 # Conclusions
+
+##### When using process-based models
 
 * At a coarse, high-level the `avg lstm` and `massive lstm` behave similarly (beyond performance metrics).
 <br>
@@ -808,11 +942,48 @@ PDP take-aways:
   
   
 *Caveat*: PDP-approach for exploring prediction at out-of-sample input values varies one input variable at a time into new values while the others inputs are using in-sample values. This has the limitation of considering potentially unrealistic values (e.g., unrealistic combinations of rain fall and incoming radiation) and may not accurately consider how multiple variable may covary into out-of-sample space.
+
+##### When not using process-based models
+
+* At a coarse, high-level the `avg` and `massive` lstm behave similar, but individual feature-level patterns can notably vary
+<br>
+
+* Expected gradients and permutation-based importance identify the same top-4 features with differing order:
+  * Air temperature
+  * Longwave radiation
+  * Max depth
+  * Shortwave radiation
+<br>
+<br>
+  
+* Variable ranking is less consistent across methods below the top-4 features, however `rain` is most consistently seen as less important
+  * Permutation-based feature importance recognizes static features more
+  * EGs recognize dynamic features more
+<br>
+<br>
+  
+* For both models, input values occuring in the heat of summer are not assigned predictive attribution
+<br>
+
+* For both models, predicting the ice off transition assigns predictive attribution further back in time (on the order of $2$ additional months).
+  * Along these lines, the `avg lstm` remembers for longer than the `massive lstm` in both scenarios, but this is more notable for ice off prediction (20 additional days compared to 3 additional days).
+  * Notably, when predicting ice on, both models assigned higher attribution to wind speed, lake depth, and relative humidity and when predicting ice off, both models assigned higher attribution to measures of incoming radiation.
+<br>
+<br>
+
+* Static variables (area and depth) were found to significantly correlate with the size of the attributed temporal window (where 95% of predictive attribution was assigned, unit = days).
+  * ice-off had the clearest findings, where more expansive and deeper lakes were independently found to have larger memory
+  * depth was significantly but opposingly correlated with ice-on memory. The `massive` models positive correlation was more plausible
+  * one exception is that more expansive lakes were not correlated with ice-on memory
+<br>
+<br>
+
+* At the feature-level, there was not convergence between the models' learned patterns. The models found disagreeing levels of positive/negative correlation, linear/nonlinear effects, and threshold points/strengths. The `avg` lstm deviated into larger predictive changes when given new out-of-sample feature values (e.g., for `MaxDepth` and `RelHumid`).
 <!-- #endregion -->
 
 <br><br><br>
 
-### Paper figure
+### Paper figure - not yet updated
 
 ```python
 valid_variables
