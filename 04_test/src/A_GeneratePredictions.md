@@ -32,8 +32,14 @@ test_fpath = process_out_dir + 'test_data.npz'
 
 train_out_dir = '02_train/out/'
 
-data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_1_.pt'
-model_weights_fpath = train_out_dir + 'massive_lstm_weights_1_.pth'
+remove_PB = True
+
+if remove_PB:
+    data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_0_NoProcessBasedInput_.pt'
+    model_weights_fpath = train_out_dir + 'massive_lstm_weights_0_NoProcessBasedInput_.pth'
+else:
+    data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_1_.pt'
+    model_weights_fpath = train_out_dir + 'massive_lstm_weights_1_.pth'
 ```
 
 ```python
@@ -70,8 +76,12 @@ elif 'avg_lstm' in data_scalars_fpath:
 ```python
 test_out_dir = '04_test/out/'
 
-soft_test_preds_fpath = test_out_dir + 'massive_lstm_soft_test_preds_1_.npy'
-test_preds_fpath = test_out_dir + 'massive_lstm_test_preds_1_.npy'
+if remove_PB:
+    soft_test_preds_fpath = test_out_dir + 'massive_lstm_soft_test_preds_0_NoProcessBasedInput_.npy'
+    test_preds_fpath = test_out_dir + 'massive_lstm_test_preds_0_NoProcessBasedInput_.npy'
+else:
+    soft_test_preds_fpath = test_out_dir + 'massive_lstm_soft_test_preds_1_.npy'
+    test_preds_fpath = test_out_dir + 'massive_lstm_test_preds_1_.npy'
 ```
 
 ```python
@@ -87,8 +97,44 @@ test = np.load(test_fpath, allow_pickle = True)
 ```
 
 ```python
-soft_test_x = torch.from_numpy(soft_test['x']).float()
-test_x = torch.from_numpy(test['x']).float()
+soft_test_x =  soft_test['x']
+soft_test_variables = soft_test['features']
+```
+
+```python
+test_x =  test['x']
+test_variables = test['features']
+```
+
+```python
+# Remove the process-based estimate if desired
+if remove_PB:
+    # remove estimate of ice
+    test_ice_loc = np.argwhere(test_variables == 'ice').item()
+    soft_test_ice_loc = np.argwhere(soft_test_variables == 'ice').item()
+    assert test_ice_loc == soft_test_ice_loc
+    test_x = np.delete(test_x, test_ice_loc, -1)
+    soft_test_x = np.delete(soft_test_x, test_ice_loc, -1)
+    test_variables = np.delete(test_variables, test_ice_loc)
+    soft_test_variables = np.delete(soft_test_variables, test_ice_loc)
+    
+    
+    # remove estimate of surface water temp
+    test_temp_0_x_loc = np.argwhere(test_variables == 'temp_0_x').item()
+    soft_test_temp_0_x_loc = np.argwhere(soft_test_variables == 'temp_0_x').item()
+    assert test_temp_0_x_loc == soft_test_temp_0_x_loc
+    test_x = np.delete(test_x, test_temp_0_x_loc, -1)
+    soft_test_x = np.delete(soft_test_x, test_temp_0_x_loc, -1)
+    test_variables = np.delete(test_variables, test_temp_0_x_loc)
+    soft_test_variables = np.delete(soft_test_variables, test_temp_0_x_loc)
+    
+else:
+    print('Keeping proces-based estimate')
+```
+
+```python
+soft_test_x = torch.from_numpy(soft_test_x).float()
+test_x = torch.from_numpy(test_x).float()
 ```
 
 ```python
