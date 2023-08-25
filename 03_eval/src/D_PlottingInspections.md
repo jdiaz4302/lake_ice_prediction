@@ -33,10 +33,19 @@ train_out_dir = '../../02_train/out/'
 train_data_fpath = process_out_dir + 'train_data.npz'
 valid_data_fpath = process_out_dir + 'valid_data.npz'
 
-train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_1_.npy'
-valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_1_.npy'
+remove_PB = True
 
-eval_metrics_fpath = '../out/massive_lstm_eval_metrics_1_.npz'
+if remove_PB:
+    train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_0_NoProcessBasedInput_.npy'
+    valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_0_NoProcessBasedInput_.npy'
+
+    eval_metrics_fpath = '../out/massive_lstm_eval_metrics_0_NoProcessBasedInput_.npz'
+    
+else:
+    train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_1_.npy'
+    valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_1_.npy'
+
+    eval_metrics_fpath = '../out/massive_lstm_eval_metrics_1_.npz'
 
 mapping_reference = "../../01_process/in/MN_ice/raw_data_from_DNR/lake_ice_id_spreadsheet.xlsx"
 ```
@@ -249,6 +258,8 @@ plot_and_print_resid_corr(depths, 'Lake Maximum Depth\nlog-transformed')
 
 ## List of significant residual correlations
 
+## With process-based inputs
+
 ##### Latitude
 
 * The process-based model's and the massive lstm's residuals are signficantly correlated with latitude on all 3 date-based predictions
@@ -273,6 +284,17 @@ plot_and_print_resid_corr(depths, 'Lake Maximum Depth\nlog-transformed')
 
 * The process-based model's residuals are significantly correlated with static lake descriptions in 9/12 tested scenarios, most notably latitude and lake area for all 3 date-based predictions.
 * The massive lstm's residuals are significantly correlated with static lake descriptions in 4/12 tested scenarios, with 3 of those scenarios involving latitude.
+
+## With NO process-based inputs
+
+##### Latitude
+
+* massive lstm residuals were significantly and positively correlated with latitude for ice off and ice duration
+
+### In total
+
+* The massive lstm's residuals are significantly correlated with static lake descriptions in 2/12 tested scenarios, with both of those scenarios involving latitude.
+
 
 ```python
 

@@ -35,8 +35,13 @@ soft_test_data_fpath = process_out_dir + 'soft_test_data.npz'
 test_data_fpath = process_out_dir + 'test_data.npz'
 
 # associated predictions
-soft_test_preds_fpath = test_out_dir + 'massive_lstm_soft_test_preds_1_.npy'
-test_preds_fpath = test_out_dir + 'massive_lstm_test_preds_1_.npy'
+remove_PB = True
+if remove_PB:
+    soft_test_preds_fpath = test_out_dir + 'massive_lstm_soft_test_preds_0_NoProcessBasedInput_.npy'
+    test_preds_fpath = test_out_dir + 'massive_lstm_test_preds_0_NoProcessBasedInput_.npy'
+else:
+    soft_test_preds_fpath = test_out_dir + 'massive_lstm_soft_test_preds_1_.npy'
+    test_preds_fpath = test_out_dir + 'massive_lstm_test_preds_1_.npy'
 ```
 
 ### Values
@@ -66,7 +71,10 @@ colors = ['#1b9e77', '#d95f02', '#7570b3']
 ### Outputs
 
 ```python
-test_set_eval_metrics_fpath = '../out/massive_lstm_test_metrics_1_.npz'
+if remove_PB:
+    test_set_eval_metrics_fpath = '../out/massive_lstm_test_metrics_0_NoProcessBasedInput_.npz'
+else:
+    test_set_eval_metrics_fpath = '../out/massive_lstm_test_metrics_1_.npz'
 ```
 
 # Import data

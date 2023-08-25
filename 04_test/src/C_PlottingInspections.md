@@ -27,17 +27,29 @@ from scipy.stats import spearmanr
 
 ```python
 process_out_dir = '../../01_process/out/'
+train_out_dir = '../../02_train/out/'
 test_out_dir = '../../04_test/out/'
 
 # data, primarily for the ice flags
+train_data_fpath = process_out_dir + 'train_data.npz'
+valid_data_fpath = process_out_dir + 'valid_data.npz'
 soft_test_data_fpath = process_out_dir + 'soft_test_data.npz'
 test_data_fpath = process_out_dir + 'test_data.npz'
 
 # associated predictions
-soft_test_preds_fpath = test_out_dir + 'massive_lstm_soft_test_preds_1_.npy'
-test_preds_fpath = test_out_dir + 'massive_lstm_test_preds_1_.npy'
-
-eval_metrics_fpath = '../out/massive_lstm_test_metrics_1_.npz'
+remove_PB = True
+if remove_PB:
+    train_preds_fpath = train_out_dir + 'massive_lstm_train_preds_0_NoProcessBasedInput_.npy'
+    valid_preds_fpath = train_out_dir + 'massive_lstm_valid_preds_0_NoProcessBasedInput_.npy'
+    soft_test_preds_fpath = test_out_dir + 'massive_lstm_soft_test_preds_0_NoProcessBasedInput_.npy'
+    test_preds_fpath = test_out_dir + 'massive_lstm_test_preds_0_NoProcessBasedInput_.npy'
+    eval_metrics_fpath = '../out/massive_lstm_test_metrics_0_NoProcessBasedInput_.npz'
+else:
+    train_preds_fpath = train_out_dir + 'massive_lstm_train_preds_1_.npy'
+    valid_preds_fpath = train_out_dir + 'massive_lstm_valid_preds_1_.npy'
+    soft_test_preds_fpath = test_out_dir + 'massive_lstm_soft_test_preds_1_.npy'
+    test_preds_fpath = test_out_dir + 'massive_lstm_test_preds_1_.npy'
+    eval_metrics_fpath = '../out/massive_lstm_test_metrics_1_.npz'
 
 mapping_reference = "../../01_process/in/MN_ice/raw_data_from_DNR/lake_ice_id_spreadsheet.xlsx"
 ```
@@ -45,9 +57,25 @@ mapping_reference = "../../01_process/in/MN_ice/raw_data_from_DNR/lake_ice_id_sp
 # Import data
 
 ```python
-# Import both testing partitions
+# Import all partitions - train & valid will only be used for ice free days
+train_data = np.load(train_data_fpath, allow_pickle = True)
+valid_data = np.load(valid_data_fpath, allow_pickle = True)
 soft_test_data = np.load(soft_test_data_fpath, allow_pickle = True)
 test_data = np.load(test_data_fpath, allow_pickle = True)
+
+# Extract everything from training partition
+train_x = train_data['x']
+train_y = train_data['y']
+train_dates = train_data['dates']
+train_DOW = train_data['DOW']
+train_variables = train_data['features']
+
+# Extract everything from validation partition
+valid_x = valid_data['x']
+valid_y = valid_data['y']
+valid_dates = valid_data['dates']
+valid_DOW = valid_data['DOW']
+valid_variables = valid_data['features']
 
 # Extract everything from soft testing partition
 soft_test_x = soft_test_data['x']
@@ -64,6 +92,8 @@ test_DOW = test_data['DOW']
 test_variables = test_data['features']
 
 # Import associated predictions
+train_preds = np.load(train_preds_fpath)
+valid_preds = np.load(valid_preds_fpath)
 soft_test_preds = np.load(soft_test_preds_fpath)
 test_preds = np.load(test_preds_fpath)
 ```
@@ -89,6 +119,12 @@ test_years_train_lakes_dates = soft_test_dates[test_years_train_lakes_ids]
 ice_var_idx = int(np.argwhere(test_variables == 'ice'))
 depth_var_idx = int(np.argwhere(test_variables == 'MaxDepth'))
 area_var_idx = int(np.argwhere(test_variables == 'LakeArea'))
+assert train_variables[ice_var_idx] == 'ice'
+assert train_variables[depth_var_idx] == 'MaxDepth'
+assert train_variables[area_var_idx] == 'LakeArea'
+assert valid_variables[ice_var_idx] == 'ice'
+assert valid_variables[depth_var_idx] == 'MaxDepth'
+assert valid_variables[area_var_idx] == 'LakeArea'
 assert soft_test_variables[ice_var_idx] == 'ice'
 assert soft_test_variables[depth_var_idx] == 'MaxDepth'
 assert soft_test_variables[area_var_idx] == 'LakeArea'
@@ -123,6 +159,245 @@ for i in range(20):
     plt.xlim(100, 325)
     plt.legend();
 ```
+
+# Ice free days through time
+
+```python
+ice_on_cutoff = 215
+
+def extract_date_i_and_date(ice_indications, dates):
+    
+    # ice_on_cutoff is globally defined
+    
+    ice_on_ids = []
+    ice_off_ids = []
+    
+    ice_on = []
+    ice_off = []
+
+    for i in range(ice_indications.shape[0]):
+        # Result in +1 when ice emerges and -1 when ice disappears. 0 otherwise.
+        diff_i = np.diff(ice_indications[i, :])
+
+        # Indexing by -1 finds the latest/"max" occurrence
+        # for ice_on, we need to avoid late season refreeze ice on dates
+        ice_on_index = np.argwhere(diff_i == 1)[np.argwhere(diff_i == 1) < ice_on_cutoff][-1].item()
+        ice_off_index = np.argwhere(diff_i == -1)[-1].item()
+
+        # Store found indices
+        ice_on_ids.append(ice_on_index)
+        ice_off_ids.append(ice_off_index)
+        
+        # Store found dates
+        ice_on.append(dates[i, ice_on_index])
+        ice_off.append(dates[i, ice_off_index])
+        
+    return(ice_on_ids, ice_off_ids,
+           ice_on, ice_off)
+```
+
+```python
+# important dates = last ice on and last ice off
+# get important dates and date-indices for observations
+### Train
+objects = extract_date_i_and_date(train_y, train_dates)
+train_obs_ice_on_ids, train_obs_ice_off_ids, train_obs_ice_on, train_obs_ice_off = objects
+### Valid
+objects = extract_date_i_and_date(valid_y, valid_dates)
+valid_obs_ice_on_ids, valid_obs_ice_off_ids, valid_obs_ice_on, valid_obs_ice_off = objects
+### Soft test
+objects = extract_date_i_and_date(soft_test_y, soft_test_dates)
+soft_test_obs_ice_on_ids, soft_test_obs_ice_off_ids, soft_test_obs_ice_on, soft_test_obs_ice_off = objects
+### Test
+objects = extract_date_i_and_date(test_y, test_dates)
+test_obs_ice_on_ids, test_obs_ice_off_ids, test_obs_ice_on, test_obs_ice_off = objects
+```
+
+```python
+# get important dates and date-indices for PBM
+### Train
+objects = extract_date_i_and_date(train_x[:, :, ice_var_idx], train_dates)
+train_flag_ice_on_ids, train_flag_ice_off_ids, train_flag_ice_on, train_flag_ice_off = objects
+### Train
+objects = extract_date_i_and_date(valid_x[:, :, ice_var_idx], valid_dates)
+valid_flag_ice_on_ids, valid_flag_ice_off_ids, valid_flag_ice_on, valid_flag_ice_off = objects
+### Train
+objects = extract_date_i_and_date(soft_test_x[:, :, ice_var_idx], soft_test_dates)
+soft_test_flag_ice_on_ids, soft_test_flag_ice_off_ids, soft_test_flag_ice_on, soft_test_flag_ice_off = objects
+### Train
+objects = extract_date_i_and_date(test_x[:, :, ice_var_idx], test_dates)
+test_flag_ice_on_ids, test_flag_ice_off_ids, test_flag_ice_on, test_flag_ice_off = objects
+```
+
+```python
+# get important dates and date-indices for LSTM prediction
+### Train
+objects = extract_date_i_and_date(np.round(train_preds)[:, :, 0], train_dates)
+train_pred_ice_on_ids, train_pred_ice_off_ids, train_pred_ice_on, train_pred_ice_off = objects
+### Train
+objects = extract_date_i_and_date(np.round(valid_preds)[:, :, 0], valid_dates)
+valid_pred_ice_on_ids, valid_pred_ice_off_ids, valid_pred_ice_on, valid_pred_ice_off = objects
+### Train
+objects = extract_date_i_and_date(np.round(soft_test_preds)[:, :, 0], soft_test_dates)
+soft_test_pred_ice_on_ids, soft_test_pred_ice_off_ids, soft_test_pred_ice_on, soft_test_pred_ice_off = objects
+### Train
+objects = extract_date_i_and_date(np.round(test_preds)[:, :, 0], test_dates)
+test_pred_ice_on_ids, test_pred_ice_off_ids, test_pred_ice_on, test_pred_ice_off = objects
+```
+
+```python
+train_year_of_sequence = np.asarray([int(dates[0].split('-')[0]) for dates in train_data['dates']])
+valid_year_of_sequence = np.asarray([int(dates[0].split('-')[0]) for dates in valid_data['dates']])
+soft_test_year_of_sequence = np.asarray([int(dates[0].split('-')[0]) for dates in soft_test_data['dates']])
+test_year_of_sequence = np.asarray([int(dates[0].split('-')[0]) for dates in test_data['dates']])
+```
+
+```python
+import datetime
+from scipy.stats import linregress
+```
+
+```python
+obs_ice_on = np.concatenate([train_obs_ice_on,
+                             valid_obs_ice_on,
+                             soft_test_obs_ice_on,
+                             test_obs_ice_on])
+
+flag_ice_on = np.concatenate([train_flag_ice_on,
+                             valid_flag_ice_on,
+                             soft_test_flag_ice_on,
+                             test_flag_ice_on])
+
+pred_ice_on = np.concatenate([train_pred_ice_on,
+                              valid_pred_ice_on,
+                              soft_test_pred_ice_on,
+                              test_pred_ice_on])
+
+year_of_sequence = np.concatenate([train_year_of_sequence,
+                                   valid_year_of_sequence,
+                                   soft_test_year_of_sequence,
+                                   test_year_of_sequence])
+```
+
+```python
+obs_day_of_year_ice_on = np.asarray([
+    datetime.datetime.strptime(str_date, '%Y-%m-%d').timetuple().tm_yday for str_date in obs_ice_on
+])
+flag_day_of_year_ice_on = np.asarray([
+    datetime.datetime.strptime(str_date, '%Y-%m-%d').timetuple().tm_yday for str_date in flag_ice_on
+])
+pred_day_of_year_ice_on = np.asarray([
+    datetime.datetime.strptime(str_date, '%Y-%m-%d').timetuple().tm_yday for str_date in pred_ice_on
+])
+
+fig, ax = plt.subplots(1, 4, figsize = (20, 5))
+
+ax[0].scatter(year_of_sequence, obs_day_of_year_ice_on)
+ax[1].scatter(year_of_sequence, flag_day_of_year_ice_on)
+ax[2].scatter(year_of_sequence, pred_day_of_year_ice_on)
+
+obs_lm = linregress(year_of_sequence, obs_day_of_year_ice_on)
+ax[0].axline([0, obs_lm.intercept], slope = obs_lm.slope, zorder = 1, color = 'red')
+ax[0].set_xlim(min(year_of_sequence) - 1, max(year_of_sequence) + 1)
+ax[0].set_ylim(290, 375)
+ax[0].set_title('Observed\np-value = ' + str(obs_lm.pvalue))
+print('Observed\n\t', obs_lm)
+
+flag_lm = linregress(year_of_sequence, flag_day_of_year_ice_on)
+ax[1].axline([0, flag_lm.intercept], slope = flag_lm.slope, zorder = 1, color = 'red')
+ax[1].set_xlim(min(year_of_sequence) - 1, max(year_of_sequence) + 1)
+ax[1].set_ylim(290, 375)
+ax[1].set_title('PBM\np-value = ' + str(flag_lm.pvalue))
+print('\n\nPBM\n\t', flag_lm)
+
+pred_lm = linregress(year_of_sequence, pred_day_of_year_ice_on)
+ax[2].axline([0, pred_lm.intercept], slope = pred_lm.slope, zorder = 1, color = 'red')
+ax[2].set_xlim(min(year_of_sequence) - 1, max(year_of_sequence) + 1)
+ax[2].set_ylim(290, 375)
+ax[2].set_title('Predicted\np-value = ' + str(pred_lm.pvalue))
+print('\n\nPredicted\n\t', pred_lm)
+
+
+ax[3].axline([0, obs_lm.intercept], slope = obs_lm.slope, zorder = 1, color = 'tab:blue')
+ax[3].axline([0, flag_lm.intercept], slope = flag_lm.slope, zorder = 1, color = 'tab:orange')
+ax[3].axline([0, pred_lm.intercept], slope = pred_lm.slope, zorder = 1, color = 'tab:green')
+ax[3].set_xlim(min(year_of_sequence) - 1, max(year_of_sequence) + 1)
+ax[3].set_ylim(320, 340);
+```
+
+```python
+obs_ice_off = np.concatenate([train_obs_ice_off,
+                             valid_obs_ice_off,
+                             soft_test_obs_ice_off,
+                             test_obs_ice_off])
+
+flag_ice_off = np.concatenate([train_flag_ice_off,
+                              valid_flag_ice_off,
+                              soft_test_flag_ice_off,
+                              test_flag_ice_off])
+
+pred_ice_off = np.concatenate([train_pred_ice_off,
+                              valid_pred_ice_off,
+                              soft_test_pred_ice_off,
+                              test_pred_ice_off])
+```
+
+```python
+obs_day_of_year_ice_off = np.asarray([
+    datetime.datetime.strptime(str_date, '%Y-%m-%d').timetuple().tm_yday for str_date in obs_ice_off
+])
+flag_day_of_year_ice_off = np.asarray([
+    datetime.datetime.strptime(str_date, '%Y-%m-%d').timetuple().tm_yday for str_date in flag_ice_off
+])
+pred_day_of_year_ice_off = np.asarray([
+    datetime.datetime.strptime(str_date, '%Y-%m-%d').timetuple().tm_yday for str_date in pred_ice_off
+])
+
+fig, ax = plt.subplots(1, 4, figsize = (20, 5))
+
+ax[0].scatter(year_of_sequence, obs_day_of_year_ice_off)
+ax[1].scatter(year_of_sequence, flag_day_of_year_ice_off)
+ax[2].scatter(year_of_sequence, pred_day_of_year_ice_off)
+
+obs_lm = linregress(year_of_sequence, obs_day_of_year_ice_off)
+ax[0].axline([0, obs_lm.intercept], slope = obs_lm.slope, zorder = 1, color = 'red')
+ax[0].set_xlim(min(year_of_sequence) - 1, max(year_of_sequence) + 1)
+ax[0].set_ylim(50, 150)
+ax[0].set_title('Observed\np-value = ' + str(obs_lm.pvalue))
+print('Observed\n\t', obs_lm)
+
+flag_lm = linregress(year_of_sequence, flag_day_of_year_ice_off)
+ax[1].axline([0, flag_lm.intercept], slope = flag_lm.slope, zorder = 1, color = 'red')
+ax[1].set_xlim(min(year_of_sequence) - 1, max(year_of_sequence) + 1)
+ax[1].set_ylim(50, 150)
+ax[1].set_title('PBM\np-value = ' + str(flag_lm.pvalue))
+print('\n\nPBM\n\t', flag_lm)
+
+pred_lm = linregress(year_of_sequence, pred_day_of_year_ice_off)
+ax[2].axline([0, pred_lm.intercept], slope = pred_lm.slope, zorder = 1, color = 'red')
+ax[2].set_xlim(min(year_of_sequence) - 1, max(year_of_sequence) + 1)
+ax[2].set_ylim(50, 150)
+ax[2].set_title('Predicted\np-value = ' + str(pred_lm.pvalue))
+print('\n\nPredicted\n\t', pred_lm)
+
+
+ax[3].axline([0, obs_lm.intercept], slope = obs_lm.slope, zorder = 1, color = 'tab:blue')
+ax[3].axline([0, flag_lm.intercept], slope = flag_lm.slope, zorder = 1, color = 'tab:orange')
+ax[3].axline([0, pred_lm.intercept], slope = pred_lm.slope, zorder = 1, color = 'tab:green')
+ax[3].set_xlim(min(year_of_sequence) - 1, max(year_of_sequence) + 1)
+ax[3].set_ylim(90, 115);
+```
+
+##### With NO process-based inputs
+
+Immediately, it is clear that the ML predictions better match observations than PBM predictions. Even when significance findings differ, overall pattern is better fit using the ML predictions.
+
+We see that linear trend of ice-on date through time is signficant and consistent between observations and ML predictions, where we observe that average ice-on date has gotten about 1 week later over 40 years.
+
+For ice-off, the results are more null, where observations see no change but the predictions expect singificantly (but marginally) earlier ice-off.
+
+In both cases, we thus see that an approximately 1 week increase in ice-free dates
+
 
 # Spatial distribution
 
@@ -266,6 +541,8 @@ plot_and_print_resid_corr(depths, 'Lake Maximum Depth\nlog-transformed')
 
 ## List of significant residual correlations
 
+### With process-based inputs
+
 ##### Latitude
 
 * The process-based model's residuals are signficantly correlated with latitude on ice on and ice duration prediction. 
@@ -287,6 +564,12 @@ plot_and_print_resid_corr(depths, 'Lake Maximum Depth\nlog-transformed')
 ### In total
 
 * The process-based model's residuals are significantly correlated with static lake descriptions in 4/12 tested scenarios, half of these scenarios involve latitude.
+* The massive lstm's residuals are significantly correlated with static lake descriptions in 2/12 tested scenarios, both of these scenarios involve latitude.
+
+### With NO process-based inputs
+
+### In total
+
 * The massive lstm's residuals are significantly correlated with static lake descriptions in 2/12 tested scenarios, both of these scenarios involve latitude.
 
 
@@ -322,7 +605,7 @@ for i in [264, 148, 331, 339, 99]:
 
 fig.tight_layout()
 
-plt.savefig('../../handpicked_test_timeseries.PNG', dpi = 300, bbox_inches = 'tight')
+plt.savefig('../../handpicked_test_timeseries_NoPB.PNG', dpi = 300, bbox_inches = 'tight')
 ```
 
 ```python
