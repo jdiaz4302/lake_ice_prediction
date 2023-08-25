@@ -18,6 +18,7 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
+import pandas as pd
 ```
 
 # Configuration
@@ -33,6 +34,8 @@ valid_data_fpath = process_out_dir + 'valid_data.npz'
 train_out_dir = '../../02_train/out/'
 
 eval_out_dir = '../../03_eval/out/'
+
+mapping_reference = "../../01_process/in/MN_ice/raw_data_from_DNR/lake_ice_id_spreadsheet.xlsx"
 
 remove_PB = True
 
@@ -587,6 +590,19 @@ Both models have increased attribution to the following variables when predictin
 # How EGs vary by static var
 
 
+### Add in lat & long
+
+```python
+# Read in the MN lake metadata, focusing on coordiantes and lake size
+lat_lon_ref_df = pd.read_excel(mapping_reference,
+                               usecols=['dow num', 'lat', 'long', 'acres'])
+lat_lon_ref_df = lat_lon_ref_df.rename(columns = {'dow num':'DOW'})
+
+# Merge that information with the validation set DOWs
+seq_DOWs = pd.DataFrame({'DOW':valid_DOW})
+mapping_df = seq_DOWs.merge(lat_lon_ref_df, on='DOW', how = 'left')
+```
+
 ### Extract static variables
 
 ```python
@@ -607,7 +623,23 @@ plt.title('Static vars associated with EGs')
 spearmanr(depths, areas)
 ```
 
-Area and depth are significantly and positively correlated in this sample
+```python
+# See if/how much they're correlated with each other
+lats = mapping_df['lat'][avg_valid_eg_IDs_ice_on]
+longs = mapping_df['long'][avg_valid_eg_IDs_ice_on]
+plt.scatter(x = depths, y = lats)
+plt.xlabel('Depths\n(min-max scaled)')
+plt.ylabel('Latitude')
+plt.title('Static vars associated with EGs')
+print(spearmanr(depths, lats), '\n',
+      spearmanr(areas, lats), '\n',
+      spearmanr(depths, longs), '\n',
+      spearmanr(areas, longs))
+```
+
+Area and depth are significantly and positively correlated in this sample.
+
+Latitude is independent of the others
 
 ```python
 # For both model sizes and ice on/off...
@@ -629,19 +661,25 @@ for i in range(n_eg_fine):
 ### Plot static variable values versus an approximation of how long the model remembers
 
 ```python
-fig, ax = plt.subplots(2, 2, figsize = (12, 12))
+fig, ax = plt.subplots(2, 4, figsize = (18, 9))
 
 # plot static variable values vs how many days account for 95% of EG attributions
 ax[0, 0].scatter(depths, avg_num_attributed_days_ice_on_ls)
 ax[0, 1].scatter(areas, avg_num_attributed_days_ice_on_ls)
+ax[0, 2].scatter(lats, avg_num_attributed_days_ice_on_ls)
+ax[0, 3].scatter(longs, avg_num_attributed_days_ice_on_ls)
 ax[1, 0].scatter(depths, massive_num_attributed_days_ice_on_ls)
 ax[1, 1].scatter(areas, massive_num_attributed_days_ice_on_ls)
+ax[1, 2].scatter(lats, massive_num_attributed_days_ice_on_ls)
+ax[1, 3].scatter(longs, massive_num_attributed_days_ice_on_ls)
 
 ax[0, 0].set_ylabel('Number of days for 95% attribution')
 ax[1, 0].set_ylabel('Number of days for 95% attribution')
 ax[1, 0].set_xlabel('Depth\n(min-max scaled)')
 ax[1, 1].set_xlabel('Area\n(min-max scaled)')
-for i in range(2):
+ax[1, 2].set_xlabel('Latitude\n(unscaled)')
+ax[1, 3].set_xlabel('Longitude\n(unscaled)')
+for i in range(4):
     ax[0, i].set_title('Average-sized LSTM')
     ax[1, i].set_title('Massive LSTM');
 ```
@@ -651,6 +689,9 @@ for i in range(2):
 for model in [avg_num_attributed_days_ice_on_ls, massive_num_attributed_days_ice_on_ls]:
     print(spearmanr(depths, model))
     print(spearmanr(areas, model))
+    print(spearmanr(lats, model))
+    print(spearmanr(longs, model))
+    print('\n')
 ```
 
 ##### When using process-based inputs
@@ -661,7 +702,7 @@ It may be possible that a fuller inspection - more samples and accounting for di
 
 ##### When NOT using process-based inputs
 
-Here, we see that the amount of time steps that are effectively remembered are singificantly correlated with max depth, but different models identify opposing patterns. The `massive` model remembers more for deeper lakes while `avg` models remember less for deeper lakes. The difference is largest for shallower lakes, where the `avg` model assigns relatively long memory. This is perhaps bad - in favor of the `massive` model
+Here, we see that the amount of time steps that are effectively remembered are singificantly correlated with max depth, but different models identify opposing patterns. The `massive` model remembers more for deeper lakes while `avg` models remember less for deeper lakes. The difference is largest for shallower lakes, where the `avg` model assigns relatively long memory. This is perhaps bad - in favor of the `massive` model. Newly found that latitude and longitude hold no significant correlations.
 
 
 <br><br><br><br><br>
