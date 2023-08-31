@@ -702,7 +702,7 @@ It may be possible that a fuller inspection - more samples and accounting for di
 
 ##### When NOT using process-based inputs
 
-Here, we see that the amount of time steps that are effectively remembered are singificantly correlated with max depth, but different models identify opposing patterns. The `massive` model remembers more for deeper lakes while `avg` models remember less for deeper lakes. The difference is largest for shallower lakes, where the `avg` model assigns relatively long memory. This is perhaps bad - in favor of the `massive` model. Newly found that latitude and longitude hold no significant correlations.
+Here, we see that the amount of time steps that are effectively remembered are significantly correlated with max depth, but different models identify opposing patterns. The `massive` model remembers more for deeper lakes while `avg` models remember less for deeper lakes. The difference is largest for shallower lakes, where the `avg` model assigns relatively long memory. This is perhaps bad - in favor of the `massive` model. Newly found that latitude and longitude hold no significant correlations.
 
 
 <br><br><br><br><br>
@@ -732,6 +732,9 @@ for i in range(2):
 for model in [avg_num_attributed_days_ice_off_ls, massive_num_attributed_days_ice_off_ls]:
     print(spearmanr(depths, model))
     print(spearmanr(areas, model))
+    print(spearmanr(lats, model))
+    print(spearmanr(longs, model))
+    print('\n')
 ```
 
 ##### When using process-based inputs
@@ -742,7 +745,9 @@ Overall, the small sample and (mostly) null findings do not provide strong evide
 
 ##### When NOT using process-based inputs
 
-We find that both models see signficant and positive correlations with both static attributes. This is perhaps good/intuitive because a larger body of water should have more inertia
+We find that both models see signficant and positive correlations with lake depth and area. This is perhaps good/intuitive because a larger body of water should have more inertia. Also, recall that depth and area appear correlated themselves.
+
+In addition, the `avg` model's memory is significantly and positively correlated with latitude - suggesting that the model retains past information more for more Northern lakes.
 
 
 <br><br><br><br><br>
@@ -1014,6 +1019,7 @@ PDP take-aways:
 
 * Static variables (area and depth) were found to significantly correlate with the size of the attributed temporal window (where 95% of predictive attribution was assigned, unit = days).
   * ice-off had the clearest findings, where more expansive and deeper lakes were independently found to have larger memory
+    * the `avg` lstm's memory also saw a positive and significant correlation with latitude
   * depth was significantly but opposingly correlated with ice-on memory. The `massive` models positive correlation was more plausible
   * one exception is that more expansive lakes were not correlated with ice-on memory
 <br>
@@ -1024,7 +1030,7 @@ PDP take-aways:
 
 <br><br><br>
 
-### Paper figure - not yet updated
+### Paper figure - not yet updated; is nonsense for `remove_PB = True`
 
 ```python
 valid_variables
