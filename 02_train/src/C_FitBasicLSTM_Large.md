@@ -69,12 +69,20 @@ early_stop_patience = 50
 
 # remove process-based or not
 remove_PB = True
+
+# using latitude as input or not
+use_lat = True
+if use_lat:
+    train_data_fpath = train_data_fpath.replace("out", "out_WithLat")
+    valid_data_fpath = valid_data_fpath.replace("out", "out_WithLat")
 ```
 
 ### Outputs
 
 ```python
 train_out_dir = '02_train/out/'
+if use_lat:
+    train_out_dir = train_out_dir.replace("out", "out_WithLat")
 
 # note that file names are adjusted with seed value
 if remove_PB:

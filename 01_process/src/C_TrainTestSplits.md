@@ -22,7 +22,7 @@ import pandas as pd
 
 # What happens in this notebook?
 
-1. Additional static variables are added - lake area and lake depth
+1. Additional static variables are added - lake area and lake depth (and optionally latitude)
 2. Certain variables are removed (due to their missingness or their expected availability outside the study area)
 3. Data is split into train, validation, and test partitions
   * The test partition consists of lakes and years that are not represented in the validation and train partitions
@@ -52,8 +52,16 @@ random_seed = 123
 
 date_format = '%Y-%m-%d'
 
-vars_to_keep = ['ShortWave', 'LongWave', 'AirTemp', 'RelHum', 'WindSpeed', 'Rain',
-                'Snow', 'ice', 'temp_0_x', 'MaxDepth', 'LakeArea']
+use_lat = True
+if use_lat:
+    vars_to_keep = ['ShortWave', 'LongWave', 'AirTemp', 'RelHum', 'WindSpeed', 'Rain',
+                    'Snow', 'ice', 'temp_0_x', 'MaxDepth', 'LakeArea', 'Latitude']
+    # Changing - make sure overall structure remains the same as inputs file above
+    out_dir = out_dir.replace("out/", "out_WithLat/")
+    matching_df_fpath = out_dir + "matching_sources.csv"
+else:
+    vars_to_keep = ['ShortWave', 'LongWave', 'AirTemp', 'RelHum', 'WindSpeed', 'Rain',
+                    'Snow', 'ice', 'temp_0_x', 'MaxDepth', 'LakeArea']
 
 # compatible with earlier efforts, leaves enough to train and eval with
 # a 'soft' test set can be larger, consisting of train/eval lakes during test years
@@ -97,6 +105,8 @@ print('Number of sequences before this work... ', str(x.shape[0]))
 
 # Add in area and depth from TOHA metadata
 
+### And optionally, add in latitude from MN DNR  data
+
 ```python
 matching_df = pd.read_csv(matching_df_fpath)
 matching_df
@@ -107,16 +117,39 @@ assert np.sum(np.isnan(matching_df['area'])) == np.sum(np.isnan(matching_df['dep
 ```
 
 ```python
+if use_lat:
+    # Find the rows missing latitude and retain their data release group (which identifies lower/upper coordinates)
+    df_missing_lat = matching_df[['group', 'lat']][matching_df['lat'].isna()]['group']
+
+    # For each row missing latitude...
+    for count, row in enumerate(df_missing_lat):
+        # identify the data release's lower and upper latitude bound
+        lower_bound_lat, upper_bound_lat = row.split('_')[1][1:].split('-')
+        # randomly sample a value within that bound
+        rough_estimate_lat = np.random.uniform(float(lower_bound_lat), float(upper_bound_lat))
+        # store that rough estimate
+        matching_df['lat'].iloc[df_missing_lat.index[count]] = rough_estimate_lat
+        print(lower_bound_lat, upper_bound_lat, rough_estimate_lat)
+    
+    # Now, confirm no missing values for the 14 associated lakes
+    print(df_missing_lat.shape)
+    assert np.sum(np.isnan(matching_df['lat'])) == 0
+```
+
+```python
 depth_vals = np.ones([x.shape[0], x.shape[1]])
 area_vals = np.ones([x.shape[0], x.shape[1], 1])
+lat_vals = np.ones([x.shape[0], x.shape[1], 1])
 
 count = 0
 for dow in DOW:
     depth_val = matching_df[matching_df['DOW'] == dow]['depth'].item()
     area_val = matching_df[matching_df['DOW'] == dow]['area'].item()
+    lat_val = matching_df[matching_df['DOW'] == dow]['lat'].item()
     
     depth_vals[count] = depth_val*depth_vals[count]
     area_vals[count] = area_val*area_vals[count]
+    lat_vals[count] = lat_val*lat_vals[count]
     
     count += 1
 ```
@@ -134,12 +167,23 @@ plt.hist(np.log(area_vals.flatten()));
 ```
 
 ```python
+plt.hist(lat_vals.flatten())
+plt.pause(0.0001)
+plt.hist(np.log(lat_vals.flatten()));
+```
+
+```python
 # overwrite the existing max depth (associated with deep water temp estimnates)
 x[:, :, np.argwhere(variables == 'MaxDepth').item()] = np.log(depth_vals)
 
 # add in lake area
 x = np.concatenate([x, np.log(area_vals)], axis = 2)
 variables = np.concatenate([variables, ['LakeArea']])
+
+# optionally, add in latitude
+if use_lat:
+    x = np.concatenate([x, lat_vals], axis = 2)
+    variables = np.concatenate([variables, ['Latitude']])
 ```
 
 # Demonstrate existing data missingness
@@ -417,4 +461,8 @@ len([dow for dow in valid_df['DOW'].unique() if dow in train_df['DOW'].unique()]
 ```python
 # Percent of train lakes appearing in test set
 len([dow for dow in test_df['DOW'].unique() if dow in train_df['DOW'].unique()]) / test_df['DOW'].unique().shape[0]
+```
+
+```python
+
 ```

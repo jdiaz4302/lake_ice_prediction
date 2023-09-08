@@ -85,19 +85,31 @@ remove_PB = True
 # of bad model performance to remove because they complicate analysis
 # 11 never predicts freeze
 # 13 predicts freeze but never predicts thaw
-bad_remove_PB_indices = [11, 13]
+bad_remove_PB_wout_Lat_indices = [11, 13]
+
+use_lat = True
+if use_lat:
+    train_out_dir = train_out_dir.replace("out", "out_WithLat")
+    train_data_fpath = train_data_fpath.replace("out", "out_WithLat")
+    valid_data_fpath = valid_data_fpath.replace("out", "out_WithLat")
 ```
 
 ### Outputs
 
 ```python
 # Fragile: prepare to change if new results; this is a little qualitative atm so not automated
-if remove_PB:
-    second_best_eval_metrics_fpath = '../out/avg_lstm_eval_metrics_4_NoProcessBasedInput_.npz'
-    best_eval_metrics_fpath = '../out/massive_lstm_eval_metrics_0_NoProcessBasedInput_.npz'
+if use_lat:
+    if remove_PB:
+        second_best_eval_metrics_fpath = '../out_WithLat/massive_lstm_eval_metrics_4_NoProcessBasedInput_.npz'
+        best_eval_metrics_fpath = '../out_WithLat/massive_lstm_eval_metrics_3_NoProcessBasedInput_.npz'
+    
 else:
-    second_best_eval_metrics_fpath = '../out/avg_lstm_eval_metrics_3_.npz'
-    best_eval_metrics_fpath = '../out/massive_lstm_eval_metrics_1_.npz'
+    if remove_PB:
+        second_best_eval_metrics_fpath = '../out/avg_lstm_eval_metrics_4_NoProcessBasedInput_.npz'
+        best_eval_metrics_fpath = '../out/massive_lstm_eval_metrics_0_NoProcessBasedInput_.npz'
+    else:
+        second_best_eval_metrics_fpath = '../out/avg_lstm_eval_metrics_3_.npz'
+        best_eval_metrics_fpath = '../out/massive_lstm_eval_metrics_1_.npz'
 ```
 
 # Import data
@@ -341,7 +353,9 @@ all_pred_ice_on = np.zeros([n_compare, valid_n]).astype(str)
 all_pred_ice_off = np.zeros([n_compare, valid_n]).astype(str)
 
 for i in range(n_compare):
-    if remove_PB and i in bad_remove_PB_indices:
+    # 11 never predicts about 0.5
+    # 13 never predicts melt
+    if remove_PB and not use_lat and i in bad_remove_PB_wout_Lat_indices:
         continue
     else:
         objects = extract_date_i_and_date(all_valid_predictions_class[i, :, :, 0], valid_dates)
@@ -382,7 +396,7 @@ all_pred_ice_on_error = np.zeros([n_compare, valid_n])
 all_pred_ice_on_error[:] = np.nan
 
 for i in range(n_compare):
-    if remove_PB and i in bad_remove_PB_indices:
+    if remove_PB and not use_lat and i in bad_remove_PB_wout_Lat_indices:
         continue
     else:
         all_pred_ice_on_error[i] = calc_date_errors(all_pred_ice_on[i], obs_ice_on)
@@ -436,7 +450,7 @@ all_pred_ice_off_error = np.zeros([n_compare, valid_n])
 all_pred_ice_off_error[:] = np.nan
 
 for i in range(n_compare):
-    if remove_PB and i in bad_remove_PB_indices:
+    if remove_PB and not use_lat and i in bad_remove_PB_wout_Lat_indices:
         continue
     else:
         all_pred_ice_off_error[i] = calc_date_errors(all_pred_ice_off[i], obs_ice_off)
@@ -470,7 +484,7 @@ ice_off_avg_error = []
 ice_off_rmse = []
 
 for i in range(n_compare):
-    if remove_PB and i in bad_remove_PB_indices:
+    if remove_PB and not use_lat and i in bad_remove_PB_wout_Lat_indices:
         ice_off_avg_error.append(np.nan)
         ice_off_rmse.append(np.nan)
     else:
@@ -499,7 +513,7 @@ ice_dur_avg_error = []
 ice_dur_rmse = []
 
 for i in range(n_compare):
-    if remove_PB and i in bad_remove_PB_indices:
+    if remove_PB and not use_lat and i in bad_remove_PB_wout_Lat_indices:
         ice_dur_avg_error.append(np.nan)
         ice_dur_rmse.append(np.nan)
     else:
@@ -637,11 +651,13 @@ for i in range(len(plt_objects['medians'])):
 plt.xticks(range(1, len(titles)+1), titles);
 ```
 
-The best `massive lstm` performed best, but `massive lstm`s, in general, were a less reliable training set up. Despite this unreliability across seeds, the best `massive lstm` was the best in 2/3 date-based performance categories (ice off and ice duration); it was near-best on ice on prediction too.
+~The best `massive lstm` performed best, but `massive lstm`s, in general, were a less reliable training set up. Desirable this unreliability across seeds, the best `massive lstm` was the best in 2/3 date-based performance categories (ice off and ice duration); it was near-best on ice on prediction too.~
 
-The 2nd best model was an `avg lstm`. This set up is common and was more consistent than the `massive lstm`s.
+~The 2nd best model was an `avg lstm`. This set up is common and was more consistent than the `massive lstm`s.~
 
-Both will be examined with XAI methods.
+~Both will be examined with XAI methods.~
+
+When using latitude and not using PBMs, the massive LSTMs appear pretty consistently reliably, an improvement on large LSTMs, and an improvement over avg LSTMs. The transformers are not as competitative and get worse with increasing size.
 
 
 # Final, subset view of df
