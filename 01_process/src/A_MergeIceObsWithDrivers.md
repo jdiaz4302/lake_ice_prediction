@@ -34,6 +34,13 @@ ice_obs_fpath = "../in/MN_ice/ice_duration_summarized.csv"
 
 prior_data_release_dir = "../in/prior_data_release/"
 data_release_metadata_fpath = prior_data_release_dir + "lake_metadata.csv"
+mapping_reference = "../in/MN_ice/raw_data_from_DNR/lake_ice_id_spreadsheet.xlsx"
+```
+
+### Values
+
+```python
+use_lat = True
 ```
 
 ### Outputs
@@ -41,8 +48,12 @@ data_release_metadata_fpath = prior_data_release_dir + "lake_metadata.csv"
 ```python
 out_dir = "../out/"
 out_driver_dir = out_dir + "merged_drivers/by_DOW/"
-matching_df_fpath = out_dir + "matching_sources.csv"
 missing_pgdl_fpath = out_dir + "DOW_missing_PGDL_estimates.npy"
+
+if use_lat:
+    matching_df_fpath = out_dir.replace("out/", "out_WithLat/") + "matching_sources.csv"
+else:
+    matching_df_fpath = out_dir + "matching_sources.csv"
 ```
 
 # Import base data sets
@@ -130,6 +141,19 @@ matching_df = pd.DataFrame({'DOW':DOW_nums_ls,
                             'nhdhr':nhdhr_ls,
                             'depth':depth_ls,
                             'area':area_ls})
+matching_df
+```
+
+### Append latitude
+
+```python
+# Read in the MN lake metadata, focusing on coordiantes and lake size
+lat_lon_ref_df = pd.read_excel(mapping_reference,
+                               usecols=['dow num', 'lat'])
+lat_lon_ref_df = lat_lon_ref_df.rename(columns = {'dow num':'DOW'})
+
+# Merge that information with the DOWs
+matching_df = matching_df.merge(lat_lon_ref_df, on='DOW', how = 'left')
 matching_df
 ```
 
