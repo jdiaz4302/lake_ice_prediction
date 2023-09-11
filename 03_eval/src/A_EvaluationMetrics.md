@@ -80,7 +80,7 @@ color_dict = {'avg lstm':'#1b9e77',
               'massive transformer':'#e6ab02',}
 
 # remove process-based or not
-remove_PB = True
+remove_PB = False
 # this corresponds to some known indices (dependent on data assembly steps)
 # of bad model performance to remove because they complicate analysis
 # 11 never predicts freeze
@@ -102,6 +102,9 @@ if use_lat:
     if remove_PB:
         second_best_eval_metrics_fpath = '../out_WithLat/massive_lstm_eval_metrics_4_NoProcessBasedInput_.npz'
         best_eval_metrics_fpath = '../out_WithLat/massive_lstm_eval_metrics_3_NoProcessBasedInput_.npz'
+    else:
+        second_best_eval_metrics_fpath = '../out_WithLat/massive_lstm_eval_metrics_2_.npz'
+        best_eval_metrics_fpath = '../out_WithLat/avg_lstm_eval_metrics_0_.npz'
     
 else:
     if remove_PB:
@@ -657,6 +660,8 @@ plt.xticks(range(1, len(titles)+1), titles);
 
 ~Both will be examined with XAI methods.~
 
+~When using latitude and using PBMs, the massive LSTMs appear pretty consistently reliable, but they are in steep and ultimately losing competition with average-sized LSTMs. The transformers are not as competitative and get worse with increasing size.~
+
 When using latitude and not using PBMs, the massive LSTMs appear pretty consistently reliably, an improvement on large LSTMs, and an improvement over avg LSTMs. The transformers are not as competitative and get worse with increasing size.
 
 
@@ -689,11 +694,11 @@ np.savez_compressed(best_eval_metrics_fpath, **evals1)
 evals2 = {'flag_error_ice_on':flag_ice_on_error,
           'flag_error_ice_off':flag_ice_off_error,
           'flag_error_dur':flag_error_dur,
-          'pred_error_ice_on':all_pred_ice_on_error[best_i],
-          'pred_error_ice_off':all_pred_ice_off_error[best_i],
-          'pred_error_dur':obs_dur - calc_ice_duration(all_pred_ice_off[best_i],
-                                                       all_pred_ice_on[best_i]),
-          'model_name_ls':eval_df['name'][best_i]}
+          'pred_error_ice_on':all_pred_ice_on_error[second_best_i],
+          'pred_error_ice_off':all_pred_ice_off_error[second_best_i],
+          'pred_error_dur':obs_dur - calc_ice_duration(all_pred_ice_off[second_best_i],
+                                                       all_pred_ice_on[second_best_i]),
+          'model_name_ls':eval_df['name'][second_best_i]}
 ```
 
 ```python
