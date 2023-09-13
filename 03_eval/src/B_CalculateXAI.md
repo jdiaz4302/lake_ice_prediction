@@ -63,7 +63,7 @@ data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_4_NoProcessBased
 model_weights_fpath = train_out_dir + 'avg_lstm_weights_4_NoProcessBasedInput_.pth'
 <!-- #endraw -->
 
-```python
+<!-- #raw -->
 # OR THIS
 process_out_dir = '01_process/out/'
 
@@ -74,6 +74,58 @@ train_out_dir = '02_train/out/'
 
 data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_0_NoProcessBasedInput_.pt'
 model_weights_fpath = train_out_dir + 'massive_lstm_weights_0_NoProcessBasedInput_.pth'
+<!-- #endraw -->
+
+<!-- #raw -->
+# OR THIS
+process_out_dir = '01_process/out_WithLat/'
+
+train_data_fpath = process_out_dir + 'train_data.npz'
+valid_data_fpath = process_out_dir + 'valid_data.npz'
+
+train_out_dir = '02_train/out_WithLat/'
+
+data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_0_.pt'
+model_weights_fpath = train_out_dir + 'avg_lstm_weights_0_.pth'
+<!-- #endraw -->
+
+<!-- #raw -->
+# OR THIS
+process_out_dir = '01_process/out_WithLat/'
+
+train_data_fpath = process_out_dir + 'train_data.npz'
+valid_data_fpath = process_out_dir + 'valid_data.npz'
+
+train_out_dir = '02_train/out_WithLat/'
+
+data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_2_.pt'
+model_weights_fpath = train_out_dir + 'massive_lstm_weights_2_.pth'
+<!-- #endraw -->
+
+<!-- #raw -->
+# OR THIS
+process_out_dir = '01_process/out_WithLat/'
+
+train_data_fpath = process_out_dir + 'train_data.npz'
+valid_data_fpath = process_out_dir + 'valid_data.npz'
+
+train_out_dir = '02_train/out_WithLat/'
+
+data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_3_NoProcessBasedInput_.pt'
+model_weights_fpath = train_out_dir + 'massive_lstm_weights_3_NoProcessBasedInput_.pth'
+<!-- #endraw -->
+
+```python
+# OR THIS
+process_out_dir = '01_process/out_WithLat/'
+
+train_data_fpath = process_out_dir + 'train_data.npz'
+valid_data_fpath = process_out_dir + 'valid_data.npz'
+
+train_out_dir = '02_train/out_WithLat/'
+
+data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_4_NoProcessBasedInput_.pt'
+model_weights_fpath = train_out_dir + 'massive_lstm_weights_4_NoProcessBasedInput_.pth'
 ```
 
 ```python
@@ -181,7 +233,7 @@ valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_4_NoProcessBa
 valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_4_NoProcessBasedInput_.npy'
 <!-- #endraw -->
 
-```python
+<!-- #raw -->
 # OR THIS
 eval_out_dir = '03_eval/out/'
 
@@ -193,6 +245,62 @@ valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_0
 
 valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_0_NoProcessBasedInput_.npy'
 valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_0_NoProcessBasedInput_.npy'
+<!-- #endraw -->
+
+<!-- #raw -->
+# OR THIS
+eval_out_dir = '03_eval/out_WithLat/'
+
+rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_0_.npz'
+rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_0_.npz'
+rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_0_.npz'
+
+valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_0_.npy'
+
+valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_0_.npy'
+valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_0_.npy'
+<!-- #endraw -->
+
+<!-- #raw -->
+# OR THIS
+eval_out_dir = '03_eval/out_WithLat/'
+
+rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_2_.npz'
+rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_2_.npz'
+rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_2_.npz'
+
+valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_2_.npy'
+
+valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_2_.npy'
+valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_2_.npy'
+<!-- #endraw -->
+
+<!-- #raw -->
+# OR THIS
+eval_out_dir = '03_eval/out_WithLat/'
+
+rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_3_NoProcessBasedInput_.npz'
+rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_3_NoProcessBasedInput_.npz'
+rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_3_NoProcessBasedInput_.npz'
+
+valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_3_NoProcessBasedInput_.npy'
+
+valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_3_NoProcessBasedInput_.npy'
+valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_3_NoProcessBasedInput_.npy'
+<!-- #endraw -->
+
+```python
+# OR THIS
+eval_out_dir = '03_eval/out_WithLat/'
+
+rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_4_NoProcessBasedInput_.npz'
+rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_4_NoProcessBasedInput_.npz'
+rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_4_NoProcessBasedInput_.npz'
+
+valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_4_NoProcessBasedInput_.npy'
+
+valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_4_NoProcessBasedInput_.npy'
+valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_4_NoProcessBasedInput_.npy'
 ```
 
 ```python
