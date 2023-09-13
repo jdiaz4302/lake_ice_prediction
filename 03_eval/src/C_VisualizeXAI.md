@@ -37,7 +37,7 @@ eval_out_dir = '../../03_eval/out/'
 
 mapping_reference = "../../01_process/in/MN_ice/raw_data_from_DNR/lake_ice_id_spreadsheet.xlsx"
 
-remove_PB = False
+remove_PB = True
 use_lat = True
 
 if use_lat:
