@@ -40,106 +40,39 @@ mapping_reference = "../../01_process/in/MN_ice/raw_data_from_DNR/lake_ice_id_sp
 remove_PB = True
 use_lat = True
 
-if use_lat:
-    train_out_dir = train_out_dir.replace("out", "out_WithLat")
-    eval_out_dir = eval_out_dir.replace("out", "out_WithLat")
-    valid_data_fpath = valid_data_fpath.replace("out", "out_WithLat")
-    
-    if remove_PB:
-        # we'll rescale data to compare it to training domain
-        avg_data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_4_NoProcessBasedInput_.pt'
-        massive_data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_3_NoProcessBasedInput_.pt'
-        # loss lists for scaling permutation results
-        avg_loss_list_fpath = train_out_dir + 'massive_lstm_loss_lists_4_NoProcessBasedInput_.npz'
-        massive_loss_list_fpath = train_out_dir + 'massive_lstm_loss_lists_3_NoProcessBasedInput_.npz'
+train_out_dir = train_out_dir.replace("out", "out_WithLat")
+eval_out_dir = eval_out_dir.replace("out", "out_WithLat")
+valid_data_fpath = valid_data_fpath.replace("out", "out_WithLat")
 
-        # best avg lstm
-        avg_rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_4_NoProcessBasedInput_.npz'
-        avg_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_4_NoProcessBasedInput_.npz'
-        avg_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_4_NoProcessBasedInput_.npz'
-        avg_valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_4_NoProcessBasedInput_.npy'
-        avg_valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_4_NoProcessBasedInput_.npy'
-        avg_valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_4_NoProcessBasedInput_.npy'
+# best avg lstm
+avg_data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_1_NoProcessBasedInput_.pt'
+avg_loss_list_fpath = train_out_dir + 'avg_lstm_loss_lists_1_NoProcessBasedInput_.npz'
+avg_rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_1_NoProcessBasedInput_.npz'
+avg_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_1_NoProcessBasedInput_.npz'
+avg_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_1_NoProcessBasedInput_.npz'
+avg_valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_1_NoProcessBasedInput_.npy'
+avg_valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_1_NoProcessBasedInput_.npy'
+avg_valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_1_NoProcessBasedInput_.npy'
 
-        # best massive lstm
-        massive_rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_3_NoProcessBasedInput_.npz'
-        massive_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_3_NoProcessBasedInput_.npz'
-        massive_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_3_NoProcessBasedInput_.npz'
-        massive_valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_3_NoProcessBasedInput_.npy'
-        massive_valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_3_NoProcessBasedInput_.npy'
-        massive_valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_3_NoProcessBasedInput_.npy'
-        
-    else:
-        avg_data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_2_.pt'
-        massive_data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_0_.pt'
-        # loss lists for scaling permutation results
-        avg_loss_list_fpath = train_out_dir + 'massive_lstm_loss_lists_2_.npz'
-        massive_loss_list_fpath = train_out_dir + 'avg_lstm_loss_lists_0_.npz'
+# best large lstm
+large_data_scalars_fpath =  train_out_dir + 'large_lstm_min_max_scalars_3_NoProcessBasedInput_.pt'
+large_loss_list_fpath = train_out_dir + 'large_lstm_loss_lists_3_NoProcessBasedInput_.npz'
+large_rand_valid_set_EGs_fpath = eval_out_dir + 'large_lstm_random_valid_eg_coarse_3_NoProcessBasedInput_.npz'
+large_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'large_lstm_random_valid_eg_ice_on_3_NoProcessBasedInput_.npz'
+large_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'large_lstm_random_valid_eg_ice_off_3_NoProcessBasedInput_.npz'
+large_valid_set_permutation_fpath = eval_out_dir + 'large_lstm_permutation_results_3_NoProcessBasedInput_.npy'
+large_valid_set_ICE_vals_fpath = eval_out_dir + 'large_lstm_valid_ICE_vals_3_NoProcessBasedInput_.npy'
+large_valid_set_ICE_preds_fpath = eval_out_dir + 'large_lstm_valid_ICE_preds_3_NoProcessBasedInput_.npy'
 
-        # best avg lstm
-        avg_rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_2_.npz'
-        avg_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_2_.npz'
-        avg_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_2_.npz'
-        avg_valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_2_.npy'
-        avg_valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_2_.npy'
-        avg_valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_2_.npy'
-
-        # best massive lstm
-        massive_rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_0_.npz'
-        massive_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_0_.npz'
-        massive_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_0_.npz'
-        massive_valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_0_.npy'
-        massive_valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_0_.npy'
-        massive_valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_0_.npy'
-
-else:
-    if remove_PB:
-        # we'll rescale data to compare it to training domain
-        avg_data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_4_NoProcessBasedInput_.pt'
-        massive_data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_0_NoProcessBasedInput_.pt'
-        # loss lists for scaling permutation results
-        avg_loss_list_fpath = train_out_dir + 'avg_lstm_loss_lists_4_NoProcessBasedInput_.npz'
-        massive_loss_list_fpath = train_out_dir + 'massive_lstm_loss_lists_0_NoProcessBasedInput_.npz'
-
-        # best avg lstm
-        avg_rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_4_NoProcessBasedInput_.npz'
-        avg_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_4_NoProcessBasedInput_.npz'
-        avg_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_4_NoProcessBasedInput_.npz'
-        avg_valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_4_NoProcessBasedInput_.npy'
-        avg_valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_4_NoProcessBasedInput_.npy'
-        avg_valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_4_NoProcessBasedInput_.npy'
-
-        # best massive lstm
-        massive_rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_0_NoProcessBasedInput_.npz'
-        massive_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_0_NoProcessBasedInput_.npz'
-        massive_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_0_NoProcessBasedInput_.npz'
-        massive_valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_0_NoProcessBasedInput_.npy'
-        massive_valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_0_NoProcessBasedInput_.npy'
-        massive_valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_0_NoProcessBasedInput_.npy'
-
-    else:
-        # we'll rescale data to compare it to training domain
-        avg_data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_3_.pt'
-        massive_data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_1_.pt'
-        # loss lists for scaling permutation results
-        avg_loss_list_fpath = train_out_dir + 'avg_lstm_loss_lists_3_.npz'
-        massive_loss_list_fpath = train_out_dir + 'massive_lstm_loss_lists_1_.npz'
-
-        # best avg lstm
-        avg_rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_3_.npz'
-        avg_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_3_.npz'
-        avg_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_3_.npz'
-        avg_valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_3_.npy'
-        avg_valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_3_.npy'
-        avg_valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_3_.npy'
-
-        # best massive lstm
-        massive_rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_1_.npz'
-        massive_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_1_.npz'
-        massive_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_1_.npz'
-        massive_valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_1_.npy'
-        massive_valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_1_.npy'
-        massive_valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_1_.npy'
+# best massive lstm
+massive_data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_3_NoProcessBasedInput_.pt'
+massive_loss_list_fpath = train_out_dir + 'massive_lstm_loss_lists_3_NoProcessBasedInput_.npz'
+massive_rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_3_NoProcessBasedInput_.npz'
+massive_rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_3_NoProcessBasedInput_.npz'
+massive_rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_3_NoProcessBasedInput_.npz'
+massive_valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_3_NoProcessBasedInput_.npy'
+massive_valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_3_NoProcessBasedInput_.npy'
+massive_valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_3_NoProcessBasedInput_.npy'
 
 
 # Not values, because they are constrained by previous notebooks
@@ -196,7 +129,9 @@ valid_x = torch.from_numpy(valid_x).float()
 # load the data scalars and ensure they're the same (data-based, not model-based)
 massive_min_max_scalars = torch.load(massive_data_scalars_fpath)
 avg_min_max_scalars = torch.load(avg_data_scalars_fpath)
+large_min_max_scalars = torch.load(large_data_scalars_fpath)
 assert torch.equal(massive_min_max_scalars, avg_min_max_scalars)
+assert torch.equal(massive_min_max_scalars, large_min_max_scalars)
 
 # rescale valid x
 for i in range(valid_x.shape[2]):
@@ -212,6 +147,9 @@ for i in range(valid_x.shape[2]):
 avg_valid_eg = np.load(avg_rand_valid_set_EGs_fpath, allow_pickle = True)
 avg_valid_eg_ice_on = np.load(avg_rand_valid_ice_on_EGs_fpath, allow_pickle = True)
 avg_valid_eg_ice_off = np.load(avg_rand_valid_ice_off_EGs_fpath, allow_pickle = True)
+large_valid_eg = np.load(large_rand_valid_set_EGs_fpath, allow_pickle = True)
+large_valid_eg_ice_on = np.load(large_rand_valid_ice_on_EGs_fpath, allow_pickle = True)
+large_valid_eg_ice_off = np.load(large_rand_valid_ice_off_EGs_fpath, allow_pickle = True)
 massive_valid_eg = np.load(massive_rand_valid_set_EGs_fpath, allow_pickle = True)
 massive_valid_eg_ice_on = np.load(massive_rand_valid_ice_on_EGs_fpath, allow_pickle = True)
 massive_valid_eg_ice_off = np.load(massive_rand_valid_ice_off_EGs_fpath, allow_pickle = True)
@@ -219,6 +157,9 @@ massive_valid_eg_ice_off = np.load(massive_rand_valid_ice_off_EGs_fpath, allow_p
 avg_valid_eg_results = avg_valid_eg['results']
 avg_valid_eg_results_ice_on = avg_valid_eg_ice_on['results']
 avg_valid_eg_results_ice_off = avg_valid_eg_ice_off['results']
+large_valid_eg_results = large_valid_eg['results']
+large_valid_eg_results_ice_on = large_valid_eg_ice_on['results']
+large_valid_eg_results_ice_off = large_valid_eg_ice_off['results']
 massive_valid_eg_results = massive_valid_eg['results']
 massive_valid_eg_results_ice_on = massive_valid_eg_ice_on['results']
 massive_valid_eg_results_ice_off = massive_valid_eg_ice_off['results']
@@ -226,16 +167,20 @@ massive_valid_eg_results_ice_off = massive_valid_eg_ice_off['results']
 avg_valid_eg_IDs = avg_valid_eg['ids']
 avg_valid_eg_IDs_ice_on = avg_valid_eg_ice_on['ids']
 avg_valid_eg_IDs_ice_off = avg_valid_eg_ice_off['ids']
+large_valid_eg_IDs = large_valid_eg['ids']
+large_valid_eg_IDs_ice_on = large_valid_eg_ice_on['ids']
+large_valid_eg_IDs_ice_off = large_valid_eg_ice_off['ids']
 massive_valid_eg_IDs = massive_valid_eg['ids']
 massive_valid_eg_IDs_ice_on = massive_valid_eg_ice_on['ids']
 massive_valid_eg_IDs_ice_off = massive_valid_eg_ice_off['ids']
 
-# Load permutation results
+# Load permutation and ICE results
 avg_permutation_results = np.load(avg_valid_set_permutation_fpath)
 avg_valid_set_ICE_vals = np.load(avg_valid_set_ICE_vals_fpath)
 avg_valid_set_ICE_preds = np.load(avg_valid_set_ICE_preds_fpath)
-
-# Load ICE results
+large_permutation_results = np.load(large_valid_set_permutation_fpath)
+large_valid_set_ICE_vals = np.load(large_valid_set_ICE_vals_fpath)
+large_valid_set_ICE_preds = np.load(large_valid_set_ICE_preds_fpath)
 massive_permutation_results = np.load(massive_valid_set_permutation_fpath)
 massive_valid_set_ICE_vals = np.load(massive_valid_set_ICE_vals_fpath)
 massive_valid_set_ICE_preds = np.load(massive_valid_set_ICE_preds_fpath)
@@ -243,6 +188,7 @@ massive_valid_set_ICE_preds = np.load(massive_valid_set_ICE_preds_fpath)
 
 ```python
 avg_valid_loss_list = np.load(avg_loss_list_fpath, allow_pickle = True)['valid_loss']
+large_valid_loss_list = np.load(large_loss_list_fpath, allow_pickle = True)['valid_loss']
 massive_valid_loss_list = np.load(massive_loss_list_fpath, allow_pickle = True)['valid_loss']
 ```
 
@@ -251,10 +197,15 @@ massive_valid_loss_list = np.load(massive_loss_list_fpath, allow_pickle = True)[
 assert np.sum(avg_valid_eg_IDs == massive_valid_eg_IDs) / n_eg == 1
 assert np.sum(avg_valid_eg_IDs_ice_on == massive_valid_eg_IDs_ice_on) / n_eg_fine == 1
 assert np.sum(avg_valid_eg_IDs_ice_off == massive_valid_eg_IDs_ice_off) / n_eg_fine == 1
+assert np.sum(large_valid_eg_IDs == massive_valid_eg_IDs) / n_eg == 1
+assert np.sum(large_valid_eg_IDs_ice_on == massive_valid_eg_IDs_ice_on) / n_eg_fine == 1
+assert np.sum(large_valid_eg_IDs_ice_off == massive_valid_eg_IDs_ice_off) / n_eg_fine == 1
 
 # make sure they match across EG types
 assert np.sum(avg_valid_eg_IDs == avg_valid_eg_IDs_ice_on) / n_eg == 1
 assert np.sum(avg_valid_eg_IDs == avg_valid_eg_IDs_ice_off) / n_eg == 1
+assert np.sum(large_valid_eg_IDs == avg_valid_eg_IDs_ice_on) / n_eg == 1
+assert np.sum(large_valid_eg_IDs == avg_valid_eg_IDs_ice_off) / n_eg == 1
 ```
 
 # Utility functions
@@ -314,16 +265,18 @@ def calc_num_attributed_days(subset_EGs):
 # Plot sum of absolute values of EGs across space and time
 
 ```python
-fig, ax = plt.subplots(1, 2, figsize = (12, 7))
+fig, ax = plt.subplots(1, 3, figsize = (12, 4))
 
 fig.suptitle('Expected Gradients variable importance\n(average of the normalized absolute attributions)')
 
 # Take the absolute value of EGs and aggregrate them across lakes and days
 avg_rel_abs_attribution_by_var = get_relative_abs_attribution_by_var(avg_valid_eg_results)
+large_rel_abs_attribution_by_var = get_relative_abs_attribution_by_var(large_valid_eg_results)
 massive_rel_abs_attribution_by_var = get_relative_abs_attribution_by_var(massive_valid_eg_results)
 
 # Determine a shared y-maximum for plotting
 ymax = np.max([np.max(avg_rel_abs_attribution_by_var),
+               np.max(large_rel_abs_attribution_by_var),
                np.max(massive_rel_abs_attribution_by_var)])
 ymax = ymax + ymax*0.05
 
@@ -333,74 +286,51 @@ ax[0].bar(range(len(valid_variables)),
 ax[0].set_ylabel('Average percent attribution\n(n = ' +
                  str(n_eg) + ' prediction sequences)',
                  fontsize = 12)
-ax[0].set_title('Average-sized LSTM');
+ax[0].set_title('Average-sized LSTM')
 
 ax[1].bar(range(len(valid_variables)),
-          massive_rel_abs_attribution_by_var)
-ax[1].set_title('Massive-sized LSTM')
+          large_rel_abs_attribution_by_var)
+ax[1].set_title('Large-sized LSTM')
 
-for i in range(2):
+ax[2].bar(range(len(valid_variables)),
+          massive_rel_abs_attribution_by_var)
+ax[2].set_title('Massive-sized LSTM')
+
+for i in range(3):
     ax[i].set_xticks(range(len(valid_variables)),
                      valid_variables,
                      rotation = 90)
     ax[i].set_ylim(0, ymax)
     ax[i].set_yticks(ax[i].get_yticks(), [str(int(100*tick))+'%' for tick in ax[i].get_yticks()])
     
+plt.tight_layout()
+    
 print('\nAvg model increasing importance:\t', valid_variables[np.argsort(avg_rel_abs_attribution_by_var)], '\n\n',
+      '\nLarge model increasing importance:\t', valid_variables[np.argsort(large_rel_abs_attribution_by_var)], '\n\n',
       '\nMassive model increasing importance:\t', valid_variables[np.argsort(massive_rel_abs_attribution_by_var)])
 ```
 
 ```python
-massive_rel_abs_attribution_by_var
+avg_rel_abs_attribution_by_var, large_rel_abs_attribution_by_var, massive_rel_abs_attribution_by_var
 ```
 
-<!-- #region -->
-#### When using latitude
+```python
+print(np.sum(avg_rel_abs_attribution_by_var[-3:]),
+      np.sum(large_rel_abs_attribution_by_var[-3:]),
+      np.sum(massive_rel_abs_attribution_by_var[-3:]))
+```
 
-##### ... and when using process-based inputs
-
-The relative importance of variables is generally similar in magnitude but somewhat shuffled in exact values and order. Both models favor the same top-7 variables:
-
-* air temperature
-* short wave radiation
-* long wave radiation
-* process-based estimate of surface water temperature
-* process-based estimate of ice
-* relative humidity 
-* latitude
-
-Among those top six listed above, the bottom three show less agreement/more variability
-
-
-##### ... and when NOT using process-based inputs
+#### When using latitude, not using process-based inputs, and comparing models of different sizes
 
 The relative importance of variables is pretty similar. Both models favor the following top-3 variables:
 * air temperature
 * shortwave radiation
 * longwave radiation
 
-Overall, the relative ordering and magnitude is highly agreeable. The most significant difference is that one LSTM (both here are actually massive LSTMs) more heavily emphasizes `AirTemp` at the expense of `LongWave` and `ShortWave`
+The remaining dynamic variables have largely comparable attribution, with the exception of rain which is largely discounted by the average and massive models.
 
-#### When not using latitude
+Static variables are generally not assigned large attribution, but depth and latitude are notably higher than lake area.
 
-##### ... and when using process-based inputs
-
-The relative importance of variables is pretty similar. Both models favor the following top-3 variables:
-* air temperature
-* process-based estimate of ice (`ice`)
-* process-based estimate of surface water temperature (`temp_0_x`)
-
-Relative ordering and magnitude of the top variables looks highly agreeable except the `massive lstm` places more emphasis on `ice`, seemingly at the expense of relative humidity and wind speed.
-
-##### ... and when NOT using process-based inputs
-
-The relative importance of variables is pretty similar. Both models favor the following top-3 variables:
-* air temperature
-* longwave radiation
-* shortwave radiation
-
-Overall, the relative ordering and magnitude is highly agreeable. The most significant difference is that the massive LSTM more heavily emphasizes `AirTemp` at the expense of `LongWave` and `ShortWave`
-<!-- #endregion -->
 
 <br><br><br><br><br>
 
@@ -408,7 +338,7 @@ Overall, the relative ordering and magnitude is highly agreeable. The most signi
 
 ```python
 for i in range(5):
-    fig, ax = plt.subplots(1, 2, figsize = (12, 6))
+    fig, ax = plt.subplots(1, 3, figsize = (12, 4))
     
     # draw a random index
     rand_i = np.random.choice(n_eg)
@@ -420,49 +350,36 @@ for i in range(5):
     
     # get info to make axes the same
     avg_cur_egs = avg_valid_eg_results[rand_i, :, :]
+    large_cur_egs = large_valid_eg_results[rand_i, :, :]
     massive_cur_egs = massive_valid_eg_results[rand_i, :, :] 
-    ymin = np.min([np.min(avg_cur_egs), np.min(massive_cur_egs)])
-    ymax = np.max([np.max(avg_cur_egs), np.max(massive_cur_egs)])
+    ymin = np.min([np.min(avg_cur_egs), np.min(large_cur_egs), np.min(massive_cur_egs)])
+    ymax = np.max([np.max(avg_cur_egs), np.max(large_cur_egs), np.max(massive_cur_egs)])
     ymin = ymin + ymin*0.05
     ymax = ymax + ymax*0.05
     
     # plot
     for var_i in range(len(valid_variables)):
         ax[0].plot(avg_valid_eg_results[rand_i, :, var_i])
-        ax[1].plot(massive_valid_eg_results[rand_i, :, var_i], label = valid_variables[var_i])
-    for j in range(2):
+        ax[1].plot(large_valid_eg_results[rand_i, :, var_i])
+        ax[2].plot(massive_valid_eg_results[rand_i, :, var_i], label = valid_variables[var_i])
+    for j in range(3):
         ax[j].set_ylim(ymin, ymax)
         ax[j].set_xlabel('Time step')
     ax[0].set_ylabel("Expected gradients' attribution value",
                      fontsize = 12)
     ax[0].set_title('Average-sized LSTM')
-    ax[1].set_title('Massive LSTM')
+    ax[1].set_title('Large LSTM')
+    ax[2].set_title('Massive LSTM')
     fig.legend(bbox_to_anchor = (1.05, 1))
     fig.suptitle('DOW = ' + rand_dow + ", " + rand_start_date + ' thru ' + rand_end_date)
 ```
 
-<!-- #region -->
-#### When not using latitude
+#### When not using latitude, not using process-based inputs, and comparing models of different sizes
 
-##### ... and when using process-based inputs
+Attributes are much smaller magnitude but still active outside transition periods for the average and massive model. That is, attributions do occur during the dead of winter (but not the heat of summer).
 
-Attributions are largely not occurring outside transition periods. That is, no attributions during the heat of summer or the dead of winter.
+Exact variable and magnitude of activation can vary noticeably.
 
-##### ... and when NOT using process-based inputs
-
-Attributes are much smaller magnitude but still active outside transition periods. That is, attributions do occur during the dead of winter (but not the heat of summer)
-
-
-#### When not using latitude
-
-##### ... and when using process-based inputs
-
-Attributions are largely not occurring outside transition periods. That is, no attributions during the heat of summer or the dead of winter.
-
-##### ... and when NOT using process-based inputs
-
-Attributes are smaller magnitude but still active outside transition periods. That is, attributions do occur during the dead of winter (but not the heat of summer)
-<!-- #endregion -->
 
 <br><br><br><br><br>
 
@@ -470,7 +387,7 @@ Attributes are smaller magnitude but still active outside transition periods. Th
 
 ```python
 for i in range(5):
-    fig, ax = plt.subplots(1, 2, figsize = (12, 6))
+    fig, ax = plt.subplots(1, 3, figsize = (12, 4))
     
     # draw a random index
     rand_i = np.random.choice(n_eg_fine)
@@ -482,23 +399,26 @@ for i in range(5):
     
     # get info to make axes the same
     avg_cur_egs = avg_valid_eg_results_ice_on[rand_i, :, :]
+    large_cur_egs = large_valid_eg_results_ice_on[rand_i, :, :]
     massive_cur_egs = massive_valid_eg_results_ice_on[rand_i, :, :] 
-    ymin = np.min([np.min(avg_cur_egs), np.min(massive_cur_egs)])
-    ymax = np.max([np.max(avg_cur_egs), np.max(massive_cur_egs)])
+    ymin = np.min([np.min(avg_cur_egs), np.min(large_cur_egs), np.min(massive_cur_egs)])
+    ymax = np.max([np.max(avg_cur_egs), np.max(large_cur_egs), np.max(massive_cur_egs)])
     ymin = ymin + ymin*0.05
     ymax = ymax + ymax*0.05
     
     for j in range(len(valid_variables)):
         ax[0].plot(avg_valid_eg_results_ice_on[rand_i, :, j])
-        ax[1].plot(massive_valid_eg_results_ice_on[rand_i, :, j], label = valid_variables[j])
-    for k in range(2):
+        ax[1].plot(large_valid_eg_results_ice_on[rand_i, :, j])
+        ax[2].plot(massive_valid_eg_results_ice_on[rand_i, :, j], label = valid_variables[j])
+    for k in range(3):
         ax[k].set_ylim(ymin, ymax)
         ax[k].set_xlim(ice_on_start, ice_on_end)
         ax[k].set_xlabel('Time step')
     ax[0].set_ylabel("Expected gradients' attribution value",
                      fontsize = 12)
     ax[0].set_title('Average-sized LSTM')
-    ax[1].set_title('Massive LSTM')
+    ax[1].set_title('Large LSTM')
+    ax[2].set_title('Massive LSTM')
     fig.suptitle('DOW = ' + rand_dow + ", " + rand_start_date + ' thru ' + rand_end_date)
     fig.legend(bbox_to_anchor = (1.05, 1))
 ```
@@ -507,7 +427,7 @@ for i in range(5):
 
 ```python
 for i in range(5):
-    fig, ax = plt.subplots(1, 2, figsize = (12, 6))
+    fig, ax = plt.subplots(1, 3, figsize = (12, 4))
     
     # draw a random index
     rand_i = np.random.choice(n_eg_fine)
@@ -519,46 +439,35 @@ for i in range(5):
     
     # get info to make axes the same
     avg_cur_egs = avg_valid_eg_results_ice_off[rand_i, :, :]
+    large_cur_egs = large_valid_eg_results_ice_off[rand_i, :, :]
     massive_cur_egs = massive_valid_eg_results_ice_off[rand_i, :, :] 
-    ymin = np.min([np.min(avg_cur_egs), np.min(massive_cur_egs)])
-    ymax = np.max([np.max(avg_cur_egs), np.max(massive_cur_egs)])
+    ymin = np.min([np.min(avg_cur_egs), np.min(large_cur_egs), np.min(massive_cur_egs)])
+    ymax = np.max([np.max(avg_cur_egs), np.min(large_cur_egs), np.max(massive_cur_egs)])
     ymin = ymin + ymin*0.05
     ymax = ymax + ymax*0.05
     
     for j in range(len(valid_variables)):
         ax[0].plot(avg_valid_eg_results_ice_off[rand_i, :, j])
-        ax[1].plot(massive_valid_eg_results_ice_off[rand_i, :, j], label = valid_variables[j])
-    for k in range(2):
+        ax[1].plot(large_valid_eg_results_ice_off[rand_i, :, j])
+        ax[2].plot(massive_valid_eg_results_ice_off[rand_i, :, j], label = valid_variables[j])
+    for k in range(3):
         ax[k].set_ylim(ymin, ymax)
         ax[k].set_xlim(ice_off_start, ice_off_end)
         ax[k].set_xlabel('Time step')
     ax[0].set_ylabel("Expected gradients' attribution value",
                      fontsize = 12)
     ax[0].set_title('Average-sized LSTM')
-    ax[1].set_title('Massive LSTM')
+    ax[1].set_title('Large LSTM')
+    ax[2].set_title('Massive LSTM')
     fig.suptitle('DOW = ' + rand_dow + ", " + rand_start_date + ' thru ' + rand_end_date)
     fig.legend(bbox_to_anchor = (1.05, 1))
 ```
 
-#### When using latitude
+#### When using latitude, not using process-based inputs, and comparing models of different size
 
-##### ... and when using process-based inputs
+Compared to ice on prediction, ice off prediction appears to utilize data a lot more (i.e., magnitude and duration of attributions)
 
-Compared to ice on prediction, ice off prediction appears to utilize more variables and longer memory
-
-##### ... and when NOT using process-based inputs
-
-Compared to ice on prediction, ice off prediction appears to utilize more variables and longer memory
-
-#### When not using latitude
-
-##### ... and when using process-based inputs
-
-Compared to ice on prediction, ice off prediction appears to utilize more variables
-
-##### ... and when NOT using process-based inputs
-
-Compared to ice on prediction, ice off prediction appears to utilize more variables and longer memory
+These plots generally look a lot more similar than the ice on plots. 
 
 
 <br><br><br><br><br>
@@ -566,19 +475,23 @@ Compared to ice on prediction, ice off prediction appears to utilize more variab
 # Compare how EGs vary when predicting ice-on versus ice-off transition
 
 ```python
-fig, ax = plt.subplots(1, 2, figsize = (12, 7))
+fig, ax = plt.subplots(1, 3, figsize = (12, 4))
 
 fig.suptitle('Expected Gradients variable importance\n(average of the normalized absolute attributions)')
 
 # Take the absolute value of EGs and aggregrate them across lakes and days
 avg_rel_abs_attribution_by_var_ice_on = get_relative_abs_attribution_by_var(avg_valid_eg_results_ice_on)
 avg_rel_abs_attribution_by_var_ice_off = get_relative_abs_attribution_by_var(avg_valid_eg_results_ice_off)
+large_rel_abs_attribution_by_var_ice_on = get_relative_abs_attribution_by_var(large_valid_eg_results_ice_on)
+large_rel_abs_attribution_by_var_ice_off = get_relative_abs_attribution_by_var(large_valid_eg_results_ice_off)
 massive_rel_abs_attribution_by_var_ice_on = get_relative_abs_attribution_by_var(massive_valid_eg_results_ice_on)
 massive_rel_abs_attribution_by_var_ice_off = get_relative_abs_attribution_by_var(massive_valid_eg_results_ice_off)
 
 # Determine a shared y-maximum for plotting
 ymax = np.max([np.max(avg_rel_abs_attribution_by_var_ice_on),
                np.max(avg_rel_abs_attribution_by_var_ice_off),
+               np.max(large_rel_abs_attribution_by_var_ice_on),
+               np.max(large_rel_abs_attribution_by_var_ice_off),
                np.max(massive_rel_abs_attribution_by_var_ice_on),
                np.max(massive_rel_abs_attribution_by_var_ice_off)])
 ymax = ymax + ymax*0.05
@@ -598,9 +511,19 @@ ax[0].set_ylabel('Average percent attribution\n(n = ' +
                  fontsize = 12)
 
 ax[1].bar(range(len(valid_variables)),
-          massive_rel_abs_attribution_by_var_ice_off,
+          large_rel_abs_attribution_by_var_ice_off,
           label = 'ice off')
 ax[1].bar(range(len(valid_variables)),
+          large_rel_abs_attribution_by_var_ice_on,
+          color = 'none',
+          edgecolor = 'orange',
+          linewidth = 2,
+          label = 'ice on')
+
+ax[2].bar(range(len(valid_variables)),
+          massive_rel_abs_attribution_by_var_ice_off,
+          label = 'ice off')
+ax[2].bar(range(len(valid_variables)),
           massive_rel_abs_attribution_by_var_ice_on,
           color = 'none',
           edgecolor = 'orange',
@@ -609,7 +532,8 @@ ax[1].bar(range(len(valid_variables)),
 
 # Format plot
 ax[0].set_title('Average-sized LSTM')
-ax[1].set_title('Massive LSTM')
+ax[1].set_title('Large LSTM')
+ax[2].set_title('Massive LSTM')
 plt.legend()
 
 for i in range(2):
@@ -618,24 +542,30 @@ for i in range(2):
                      rotation = 90)
     ax[i].set_ylim(0, ymax)
     ax[i].set_yticks(ax[i].get_yticks(), [str(int(100*tick))+'%' for tick in ax[i].get_yticks()])
+plt.tight_layout()
 ```
 
 ```python
 avg_ice_off_percent_change_relative_ice_on = ((avg_rel_abs_attribution_by_var_ice_off -
                                                avg_rel_abs_attribution_by_var_ice_on))
 
+large_ice_off_percent_change_relative_ice_on = ((large_rel_abs_attribution_by_var_ice_off -
+                                                 large_rel_abs_attribution_by_var_ice_on))
+
 massive_ice_off_percent_change_relative_ice_on = ((massive_rel_abs_attribution_by_var_ice_off -
                                                    massive_rel_abs_attribution_by_var_ice_on))
 
 ymin = np.min([np.min(avg_ice_off_percent_change_relative_ice_on),
+               np.min(large_ice_off_percent_change_relative_ice_on),
                np.min(massive_ice_off_percent_change_relative_ice_on)])
 ymax = np.max([np.max(avg_ice_off_percent_change_relative_ice_on),
+               np.max(large_ice_off_percent_change_relative_ice_on),
                np.max(massive_ice_off_percent_change_relative_ice_on)])
 ymin = ymin + ymin*0.05
 ymax = ymax + ymax*0.05
 
 
-fig, ax = plt.subplots(1, 2, figsize = (12, 7))
+fig, ax = plt.subplots(1, 3, figsize = (12, 4))
 
 fig.suptitle('Change in expected gradients variable importance\n' +
              'between ice on and ice off attributions: (off - on)')
@@ -644,94 +574,63 @@ ax[0].bar(range(len(valid_variables)),
           avg_ice_off_percent_change_relative_ice_on,
           label = 'ice off')
 ax[1].bar(range(len(valid_variables)),
+          large_ice_off_percent_change_relative_ice_on,
+          label = 'ice off')
+ax[2].bar(range(len(valid_variables)),
           massive_ice_off_percent_change_relative_ice_on,
           label = 'ice off')
 
 ax[0].set_ylabel('Difference\n' +
-                 'positive = higher attribution during ice off prediction',
+                 'positive = higher attribution\n' + 
+                 'during ice off prediction',
                  fontsize = 12)
 
-for i in range(2):
+for i in range(3):
     ax[i].set_ylim(ymin, ymax)
     ax[i].set_xticks(range(len(valid_variables)),
                      valid_variables,
                      rotation = 90)
     ax[i].set_yticks(ax[i].get_yticks(), [str(np.round(100*tick, 1))+'%' for tick in ax[i].get_yticks()])
+    ax[i].axhline(0.05, color = 'black', linestyle = '--')
+    ax[i].axhline(-0.05, color = 'black', linestyle = '--')
     
 ax[0].set_title('Average-sized LSTM')
-ax[1].set_title('Massive LSTM');
+ax[1].set_title('Large LSTM')
+ax[2].set_title('Massive LSTM')
+plt.tight_layout();
+```
+
+```python
+avg_ice_off_percent_change_relative_ice_on
+```
+
+```python
+large_ice_off_percent_change_relative_ice_on
+```
+
+```python
+massive_ice_off_percent_change_relative_ice_on
+```
+
+```python
+np.mean([0.04984507, 0.02307918, 0.0502334  ])
 ```
 
 <!-- #region -->
-#### When using latitude
+#### When using latitude,  not using process-based inputs, and comparing models of different sizes
 
-##### ... and when using process-based inputs
 
-Both models have increased attribution to the following variables when predicting ice off:
+All models have increased attribution to the following variables when predicting ice off:
 
-* Short wave radiation
-* Long wave radiation
-* Lake area
+* Short wave radiation*
 * Latitude
-* Rain (minor/subtle for both)
 
 Both models have increased attribution to the following variables when predicting ice on:
 
-* Process-based estimate of ice
-* Wind speed (minor/subtle for `avg`)
-* Max depth
-
-##### ... and when NOT using process-based inputs
-
-
-Both models have increased attribution to the following variables when predicting ice off:
-
-* Short wave radiation
-* Long wave radiation
-* Latitude
-* Relative humidity (minor/subtle for one)
-* Lake area (minor/subtle for both)
-
-Both models have increased attribution to the following variables when predicting ice on:
-
-* Max depth
+* Max depth*
 * Air temperature
-* Wind speed 
-* Snow (minor/subtle for one)
-
-#### When not using latitude
-
-##### ... and when using process-based inputs
-
-Both models have increased attribution to the following variables when predicting ice off:
-
-* Short wave radiation
-* Long wave radiation
-* Lake area
-
-Both models have increased attribution to the following variables when predicting ice on:
-
+* Wind speed*
 * Snow
-* Process-based estimate of ice
-* Max depth
-* Wind speed (minor/subtle for `avg`)
-
-##### ... and when NOT using process-based inputs
-
-
-Both models have increased attribution to the following variables when predicting ice off:
-
-* Short wave radiation
-* Long wave radiation
-* Air temperature (minor/subtle for `massive`)
-* Lake area (minor/subtle for `massive`)
-
-Both models have increased attribution to the following variables when predicting ice on:
-
-* Wind speed
-* Max depth
-* Relative humidity 
-* Snow (minor/subtle for `massive`)
 <!-- #endregion -->
 
 <br><br><br><br><br>
@@ -788,20 +687,24 @@ print(spearmanr(depths, lats), '\n',
 
 Area and depth are significantly and positively correlated in this sample.
 
-Latitude is independent of the others
+Latitude and longitude are independent of the others
 
 ```python
 # For both model sizes and ice on/off...
 avg_num_attributed_days_ice_on_ls = []
+large_num_attributed_days_ice_on_ls = []
 massive_num_attributed_days_ice_on_ls = []
 avg_num_attributed_days_ice_off_ls = []
+large_num_attributed_days_ice_off_ls = []
 massive_num_attributed_days_ice_off_ls = []
 
 # Figure out how many days account for 95% of EG attributions
 for i in range(n_eg_fine):
     avg_num_attributed_days_ice_on_ls.append(calc_num_attributed_days(avg_valid_eg_results_ice_on[i, :, :]))
+    large_num_attributed_days_ice_on_ls.append(calc_num_attributed_days(large_valid_eg_results_ice_on[i, :, :]))
     massive_num_attributed_days_ice_on_ls.append(calc_num_attributed_days(massive_valid_eg_results_ice_on[i, :, :]))
     avg_num_attributed_days_ice_off_ls.append(calc_num_attributed_days(avg_valid_eg_results_ice_off[i, :, :]))
+    large_num_attributed_days_ice_off_ls.append(calc_num_attributed_days(large_valid_eg_results_ice_off[i, :, :]))
     massive_num_attributed_days_ice_off_ls.append(calc_num_attributed_days(massive_valid_eg_results_ice_off[i, :, :]))
 ```
 
@@ -810,32 +713,38 @@ for i in range(n_eg_fine):
 ### Plot static variable values versus an approximation of how long the model remembers
 
 ```python
-fig, ax = plt.subplots(2, 4, figsize = (18, 9))
+fig, ax = plt.subplots(3, 4, figsize = (18, 12))
 
 # plot static variable values vs how many days account for 95% of EG attributions
 ax[0, 0].scatter(depths, avg_num_attributed_days_ice_on_ls)
 ax[0, 1].scatter(areas, avg_num_attributed_days_ice_on_ls)
 ax[0, 2].scatter(lats, avg_num_attributed_days_ice_on_ls)
 ax[0, 3].scatter(longs, avg_num_attributed_days_ice_on_ls)
-ax[1, 0].scatter(depths, massive_num_attributed_days_ice_on_ls)
-ax[1, 1].scatter(areas, massive_num_attributed_days_ice_on_ls)
-ax[1, 2].scatter(lats, massive_num_attributed_days_ice_on_ls)
-ax[1, 3].scatter(longs, massive_num_attributed_days_ice_on_ls)
+ax[1, 0].scatter(depths, large_num_attributed_days_ice_on_ls)
+ax[1, 1].scatter(areas, large_num_attributed_days_ice_on_ls)
+ax[1, 2].scatter(lats, large_num_attributed_days_ice_on_ls)
+ax[1, 3].scatter(longs, large_num_attributed_days_ice_on_ls)
+ax[2, 0].scatter(depths, massive_num_attributed_days_ice_on_ls)
+ax[2, 1].scatter(areas, massive_num_attributed_days_ice_on_ls)
+ax[2, 2].scatter(lats, massive_num_attributed_days_ice_on_ls)
+ax[2, 3].scatter(longs, massive_num_attributed_days_ice_on_ls)
 
 ax[0, 0].set_ylabel('Number of days for 95% attribution')
 ax[1, 0].set_ylabel('Number of days for 95% attribution')
-ax[1, 0].set_xlabel('Depth\n(min-max scaled)')
-ax[1, 1].set_xlabel('Area\n(min-max scaled)')
-ax[1, 2].set_xlabel('Latitude\n(unscaled)')
-ax[1, 3].set_xlabel('Longitude\n(unscaled)')
+ax[2, 0].set_ylabel('Number of days for 95% attribution')
+ax[2, 0].set_xlabel('Depth\n(min-max scaled)')
+ax[2, 1].set_xlabel('Area\n(min-max scaled)')
+ax[2, 2].set_xlabel('Latitude\n(unscaled)')
+ax[2, 3].set_xlabel('Longitude\n(unscaled)')
 for i in range(4):
     ax[0, i].set_title('Average-sized LSTM')
-    ax[1, i].set_title('Massive LSTM');
+    ax[1, i].set_title('Large LSTM')
+    ax[2, i].set_title('Massive LSTM');
 ```
 
 ```python
 # Get associated correlations and p-values
-for model in [avg_num_attributed_days_ice_on_ls, massive_num_attributed_days_ice_on_ls]:
+for model in [avg_num_attributed_days_ice_on_ls, large_num_attributed_days_ice_on_ls, massive_num_attributed_days_ice_on_ls]:
     print(spearmanr(depths, model))
     print(spearmanr(areas, model))
     print(spearmanr(lats, model))
@@ -843,31 +752,11 @@ for model in [avg_num_attributed_days_ice_on_ls, massive_num_attributed_days_ice
     print('\n')
 ```
 
-#### When using latitude
+#### When using latitude, not using process-based inputs, and comparing models of different sizes
 
-##### ... and when using process-based inputs
+In this small sample and univariate inspection, the models largely do not appear to have correlated static variables with the amount of time steps they effectively remember.
 
-In this small sample and univariate inspection, the models do not appear to have correlated static variables with the amount of time steps they effectively remember.
-
-It may be possible that a fuller inspection - more samples and accounting for differences in air temperature or latitude - may suggest otherwise.
-
-##### ... and when NOT using process-based inputs
-
-In this small sample and univariate inspection, the models do not appear to have correlated static variables with the amount of time steps they effectively remember.
-
-It may be possible that a fuller inspection - more samples and accounting for differences in air temperature or latitude - may suggest otherwise.
-
-#### When not using latitude
-
-##### ... and when using process-based inputs
-
-In this small sample and univariate inspection, the models do not appear to have correlated static variables with the amount of time steps they effectively remember.
-
-It may be possible that a fuller inspection - more samples and accounting for differences in air temperature or latitude - may suggest otherwise.
-
-##### ... and when NOT using process-based inputs
-
-Here, we see that the amount of time steps that are effectively remembered are significantly correlated with max depth, but different models identify opposing patterns. The `massive` model remembers more for deeper lakes while `avg` models remember less for deeper lakes. The difference is largest for shallower lakes, where the `avg` model assigns relatively long memory. This is perhaps bad - in favor of the `massive` model. Newly found that latitude and longitude hold no significant correlations.
+One exception is that the large LSTM memory is positively and significantly correlated with lake depth.
 
 
 <br><br><br><br><br>
@@ -877,24 +766,37 @@ Here, we see that the amount of time steps that are effectively remembered are s
 ### Plot static variable values versus an approximation of how long the model remembers
 
 ```python
-fig, ax = plt.subplots(2, 2, figsize = (12, 12))
+fig, ax = plt.subplots(3, 4, figsize = (18, 12))
 
+# plot static variable values vs how many days account for 95% of EG attributions
 ax[0, 0].scatter(depths, avg_num_attributed_days_ice_off_ls)
 ax[0, 1].scatter(areas, avg_num_attributed_days_ice_off_ls)
-ax[1, 0].scatter(depths, massive_num_attributed_days_ice_off_ls)
-ax[1, 1].scatter(areas, massive_num_attributed_days_ice_off_ls)
+ax[0, 2].scatter(lats, avg_num_attributed_days_ice_off_ls)
+ax[0, 3].scatter(longs, avg_num_attributed_days_ice_off_ls)
+ax[1, 0].scatter(depths, large_num_attributed_days_ice_off_ls)
+ax[1, 1].scatter(areas, large_num_attributed_days_ice_off_ls)
+ax[1, 2].scatter(lats, large_num_attributed_days_ice_off_ls)
+ax[1, 3].scatter(longs, large_num_attributed_days_ice_off_ls)
+ax[2, 0].scatter(depths, massive_num_attributed_days_ice_off_ls)
+ax[2, 1].scatter(areas, massive_num_attributed_days_ice_off_ls)
+ax[2, 2].scatter(lats, massive_num_attributed_days_ice_off_ls)
+ax[2, 3].scatter(longs, massive_num_attributed_days_ice_off_ls)
 
 ax[0, 0].set_ylabel('Number of days for 95% attribution')
 ax[1, 0].set_ylabel('Number of days for 95% attribution')
-ax[1, 0].set_xlabel('Depth\n(min-max scaled)')
-ax[1, 1].set_xlabel('Area\n(min-max scaled)')
-for i in range(2):
+ax[2, 0].set_ylabel('Number of days for 95% attribution')
+ax[2, 0].set_xlabel('Depth\n(min-max scaled)')
+ax[2, 1].set_xlabel('Area\n(min-max scaled)')
+ax[2, 2].set_xlabel('Latitude\n(unscaled)')
+ax[2, 3].set_xlabel('Longitude\n(unscaled)')
+for i in range(4):
     ax[0, i].set_title('Average-sized LSTM')
-    ax[1, i].set_title('Massive LSTM');
+    ax[1, i].set_title('Large LSTM')
+    ax[2, i].set_title('Massive LSTM');
 ```
 
 ```python
-for model in [avg_num_attributed_days_ice_off_ls, massive_num_attributed_days_ice_off_ls]:
+for model in [avg_num_attributed_days_ice_off_ls, large_num_attributed_days_ice_off_ls, massive_num_attributed_days_ice_off_ls]:
     print(spearmanr(depths, model))
     print(spearmanr(areas, model))
     print(spearmanr(lats, model))
@@ -902,31 +804,9 @@ for model in [avg_num_attributed_days_ice_off_ls, massive_num_attributed_days_ic
     print('\n')
 ```
 
-#### When using latitude
+#### When using latitude, not using process-based inputs, and comparing models of different sizes
 
-##### ... and when using process-based inputs
-
-Similar to ice on, memory was not generally correlated with static variables. One exception for ice off is that memory and max depth were positively and significantly correlated. This is less intuitive than if ice on was correlated with depth or if ice off was correlated with area; however, it is worth remembering that depth and area were also correlated. 
-
-Overall, the small sample and (mostly) null findings do not provide strong evidence that memory length is strongly controlled by static variables except for one subset of predictions (ice off and lake depth).
-
-##### ... and when NOT using process-based inputs
-
-One model finds a significant and positive correlation between memory and latitude - suggesting that the model retains past information more for more Northern lakes.
-
-#### When not using latitude
-
-##### ... and when using process-based inputs
-
-Similar to ice on, memory was not generally correlated with static variables. One exception for ice off is that memory and max depth were positively and significantly correlated. This is less intuitive than if ice on was correlated with depth or if ice off was correlated with area; however, it is worth remembering that depth and area were also correlated. 
-
-Overall, the small sample and (mostly) null findings do not provide strong evidence that memory length is strongly controlled by static variables except for one subset of predictions (ice off and lake depth).
-
-##### ... and when NOT using process-based inputs
-
-We find that both models see signficant and positive correlations with lake depth and area. This is perhaps good/intuitive because a larger body of water should have more inertia. Also, recall that depth and area appear correlated themselves.
-
-In addition, the `avg` model's memory is significantly and positively correlated with latitude - suggesting that the model retains past information more for more Northern lakes.
+Here it appears that smaller models have more significant correlations between LSTM memory and static variables. The average LSTM positively and significantly correlates LSTM memory with depth, area, and latitude; the large LSTM positively and significantly correlates LSTM memory with latitude; and the massive LSTM's memory displays no significant correlations.
 
 
 <br><br><br><br><br>
@@ -934,20 +814,24 @@ In addition, the `avg` model's memory is significantly and positively correlated
 # Compare memory for both models between ice on and ice off
 
 ```python
-fig, ax = plt.subplots(1, 2, figsize = (12, 7))
+fig, ax = plt.subplots(1, 3, figsize = (12, 4))
 
 fig.suptitle("Histogram for number of days representing 95% of expected gradients' attribution")
 
-ymin = min(min(avg_num_attributed_days_ice_on_ls), min(avg_num_attributed_days_ice_off_ls))
-ymax = max(max(avg_num_attributed_days_ice_on_ls), max(avg_num_attributed_days_ice_off_ls))
+ymin = min(min(avg_num_attributed_days_ice_on_ls), min(large_num_attributed_days_ice_off_ls), min(massive_num_attributed_days_ice_off_ls))
+ymax = max(max(avg_num_attributed_days_ice_on_ls), max(large_num_attributed_days_ice_off_ls), max(massive_num_attributed_days_ice_off_ls))
 
 ax[0].hist(avg_num_attributed_days_ice_on_ls, bins = range(ymin, ymax))
 ax[0].hist(avg_num_attributed_days_ice_off_ls, bins = range(ymin, ymax),
            linewidth = 2, histtype = 'step', color = 'orange')
 
-ax[1].hist(massive_num_attributed_days_ice_on_ls, bins = range(ymin, ymax),
+ax[1].hist(large_num_attributed_days_ice_on_ls, bins = range(ymin, ymax))
+ax[1].hist(large_num_attributed_days_ice_off_ls, bins = range(ymin, ymax),
+           linewidth = 2, histtype = 'step', color = 'orange')
+
+ax[2].hist(massive_num_attributed_days_ice_on_ls, bins = range(ymin, ymax),
            label = 'ice on')
-ax[1].hist(massive_num_attributed_days_ice_off_ls, bins = range(ymin, ymax),
+ax[2].hist(massive_num_attributed_days_ice_off_ls, bins = range(ymin, ymax),
            linewidth = 2, histtype = 'step', color = 'orange',
            label = 'ice off')
 plt.legend()
@@ -955,9 +839,11 @@ plt.legend()
 ax[0].set_ylabel('Frequency')
 ax[0].set_xlabel('Number of days')
 ax[1].set_xlabel('Number of days')
+ax[2].set_xlabel('Number of days')
 
 ax[0].set_title('Average-sized LSTM')
-ax[1].set_title('Massive LSTM');
+ax[1].set_title('Large LSTM')
+ax[2].set_title('Massive LSTM');
 ```
 
 ```python
@@ -965,33 +851,21 @@ np.mean(avg_num_attributed_days_ice_on_ls), np.mean(avg_num_attributed_days_ice_
 ```
 
 ```python
+np.mean(large_num_attributed_days_ice_on_ls), np.mean(large_num_attributed_days_ice_off_ls)
+```
+
+```python
 np.mean(massive_num_attributed_days_ice_on_ls), np.mean(massive_num_attributed_days_ice_off_ls)
 ```
 
-<!-- #region -->
-#### When using latitude
+```python
+np.std(avg_num_attributed_days_ice_off_ls), np.std(massive_num_attributed_days_ice_off_ls)
+```
 
-##### ... and when using process-based inputs
+#### When using latitude, not using process-based inputs, and comparing models of different sizes
 
-The `massive lstm` (labels are swapped for this subset because avg is assumed second best, and massive is assumed best from prior analysis) remembers longer for ice off but shorter for ice off prediction relative to the `avg lstm` (which remembers very equally for both transitions). Both models remember longer when predicting ice off relative to ice on.
+Across models, ice on memory is greater than 1 month. Ice off memory is much more variable with two models appearing to remember the entire icy season while another, similar to ice on emmory, remembers just over 1 month.
 
-But the most striking difference is the `avg lstm` remembering approximately 1 month for both transitions while the `massive lstm` remembers 2 weeks longer for ice off than ice on.
-
-##### ... and when NOT using process-based inputs
-
-Both models remember longer when predicting ice off relative to ice on. Their ice on memory is very comparable at 37 days, but their ice off memory varies by approximately 20 days.
-
-
-#### When not using latitude
-
-##### ... and when using process-based inputs
-
-The `avg lstm` remembers longer for both ice on and ice off prediction relative to the `massive lstm`, but both models remember longer when predicting ice off relative to ice on; the latter difference is more striking.
-
-##### ... and when NOT using process-based inputs
-
-The `avg lstm` remembers longer for both ice on and ice off prediction relative to the `massive lstm`, but both models remember longer when predicting ice off relative to ice on; the latter difference is very striking and more variable.
-<!-- #endregion -->
 
 <br><br><br><br><br>
 
@@ -1000,98 +874,104 @@ The `avg lstm` remembers longer for both ice on and ice off prediction relative 
 ```python
 # original validation losses for scaling
 avg_valid_loss = avg_valid_loss_list[avg_valid_loss_list != 0].min()
+large_valid_loss = large_valid_loss_list[large_valid_loss_list != 0].min()
 massive_valid_loss = massive_valid_loss_list[massive_valid_loss_list != 0].min()
 ```
 
 ```python
-fig, ax = plt.subplots(1, 3, figsize = (13, 6), gridspec_kw={'width_ratios': [6, 6, 1]})
+fig, ax = plt.subplots(1, 4, figsize = (13, 6), gridspec_kw={'width_ratios': [6, 6, 6, 1]})
 
 fig.suptitle("Permutation-based feature importance across samples")
 
 avg_change_relative_to_base = 100*(avg_permutation_results - avg_valid_loss) / avg_valid_loss
+large_change_relative_to_base = 100*(large_permutation_results - large_valid_loss) / large_valid_loss
 massive_change_relative_to_base = 100*(massive_permutation_results - massive_valid_loss) / massive_valid_loss
 
-vmin = np.min([np.min(avg_change_relative_to_base), np.min(massive_change_relative_to_base)])
-vmax = np.max([np.max(avg_change_relative_to_base), np.max(massive_change_relative_to_base)])
+vmin = np.min([np.min(avg_change_relative_to_base),
+               np.min(large_change_relative_to_base),
+               np.min(massive_change_relative_to_base)])
+vmax = np.max([np.max(avg_change_relative_to_base),
+               np.min(large_change_relative_to_base),
+               np.max(massive_change_relative_to_base)])
 
 im = ax[0].imshow(avg_change_relative_to_base,
              aspect = len(valid_variables) / perm_samples,
              vmin = vmin, vmax = vmax)
 
-ax[1].imshow(massive_change_relative_to_base,
+ax[1].imshow(large_change_relative_to_base,
+             aspect = len(valid_variables) / perm_samples,
+             vmin = vmin, vmax = vmax)
+
+ax[2].imshow(massive_change_relative_to_base,
              aspect = len(valid_variables) / perm_samples,
              vmin = vmin, vmax = vmax)
 
 ax[0].set_ylabel('Sample index\neach row = different prediction sequence')
 
-for i in range(2):
+for i in range(3):
     ax[i].set_xticks(range(len(valid_variables)),
                      valid_variables,
                      rotation = 90)
 
-cbar = fig.colorbar(im, cax = ax[2])
-cbar.set_label('% change in RMSE when permuted',
+cbar = fig.colorbar(im, cax = ax[3])
+cbar.set_label('% change in BCE when permuted',
                fontsize = 12, rotation = 270,
                labelpad = 24)
 
 ax[0].set_title('Average-sized LSTM')
+ax[2].set_title('Large LSTM')
 ax[1].set_title('Massive LSTM');
 ```
 
 ```python
 # original validation losses for scaling
 avg_valid_loss = avg_valid_loss_list[avg_valid_loss_list != 0].min()
+large_valid_loss = large_valid_loss_list[large_valid_loss_list != 0].min()
 massive_valid_loss = massive_valid_loss_list[massive_valid_loss_list != 0].min()
 
 
-fig, ax = plt.subplots(1, 2, figsize = (12, 6))
+fig, ax = plt.subplots(1, 3, figsize = (12, 4))
 
 fig.suptitle('Average permutation-based feature importance\n(n = ' + str(perm_samples) + ')')
 
-# plot changes in rmse
+# plot changes in BCE
 ax[0].bar(valid_variables, 100*(np.mean(avg_permutation_results, 0) - avg_valid_loss) / avg_valid_loss)
-ax[1].bar(valid_variables, 100*(np.mean(massive_permutation_results, 0) - massive_valid_loss) / massive_valid_loss)
+ax[1].bar(valid_variables, 100*(np.mean(large_permutation_results, 0) - large_valid_loss) / large_valid_loss)
+ax[2].bar(valid_variables, 100*(np.mean(massive_permutation_results, 0) - massive_valid_loss) / massive_valid_loss)
 # fix labels
-for i in range(2):
+
+for i in range(3):
+    ax[i].set_ylim(0, 60)
     ax[i].set_xticks(range(len(valid_variables)), valid_variables, rotation=75)
     ax[i].set_yticks(ax[i].get_yticks(), [str(int(tick))+'%' for tick in ax[i].get_yticks()])
-ax[0].set_ylabel('% change in RMSE when permuted', fontsize = 12)
+ax[0].set_ylabel('% change in BCE when permuted', fontsize = 12)
 
 
 print('\nAvg model increasing importance:\t', valid_variables[np.argsort(np.mean(avg_permutation_results, 0))], '\n\n',
+      '\nLarge model increasing importance:\t', valid_variables[np.argsort(np.mean(large_permutation_results, 0))], '\n\n',
       '\nMassive model increasing importance:\t', valid_variables[np.argsort(np.mean(massive_permutation_results, 0))])
 ```
 
-<!-- #region -->
-#### When using latitude
+```python
+100*(np.mean(avg_permutation_results, 0) - avg_valid_loss) / avg_valid_loss, np.sum(100*(np.mean(avg_permutation_results, 0) - avg_valid_loss) / avg_valid_loss)
+```
 
-##### ... and when using process-based inputs
+```python
+100*(np.mean(large_permutation_results, 0) - large_valid_loss) / large_valid_loss, np.sum(100*(np.mean(large_permutation_results, 0) - large_valid_loss) / large_valid_loss)
+```
 
-Permutation-based results somewhat agree with EG results. EG results focus on raw prediction, while permutation focuses on change in performance. 
+```python
+100*(np.mean(massive_permutation_results, 0) - massive_valid_loss) / massive_valid_loss, np.sum(100*(np.mean(massive_permutation_results, 0) - massive_valid_loss) / massive_valid_loss)
+```
 
-Permutation results more greatly emphasized process-based estimates and latitude, while deemphasizing radiation, windspeed, and relative humidity.
+#### When using latitude, not using process-based inputs,  and comparing models of different sizes
 
-##### ... and when NOT using process-based inputs
-
-Permutation-based mostly agree with EG results. EG results focus on raw prediction, while permutation focuses on change in performance. 
+Permutation-based mostly agree with EG results for the top dynamic variables. EG results focus on raw prediction, while permutation focuses on change in performance. 
 
 Permutation results much more greatly emphasize max depth and latitude at the expense of incoming radiation.
 
-#### When not using latitude
+The importance of air temperature in the massive model is very prominent.
 
-##### ... and when using process-based inputs
-
-Permutation-based results largely agree with EG results. EG results focus on raw prediction, while permutation focuses on change in performance. 
-
-Permutation results more greatly emphasize the importance of the top-3 variables
-
-##### ... and when NOT using process-based inputs
-
-
-Permutation-based mostly largely agree with EG results. EG results focus on raw prediction, while permutation focuses on change in performance. 
-
-Permutation results much more greatly emphasize max depth at the expense of incoming radiation.
-<!-- #endregion -->
 
 <br><br><br><br><br>
 
@@ -1100,7 +980,9 @@ Permutation results much more greatly emphasize max depth at the expense of inco
 Rather than just importance and timing, let's also get an idea for how prediction vary over the range of input variables. This will be performed across many quantiles, including the training min and max, and values beyond the training min and max.
 
 ```python
-for var_index in range(len(valid_variables)):
+fig, ax = plt.subplots(4, 3, figsize = (12, 12))
+
+for count, var_index in enumerate(range(len(valid_variables))):
     
     var_min = avg_min_max_scalars[var_index, 0].item()
     var_max = avg_min_max_scalars[var_index, 1].item()
@@ -1110,261 +992,114 @@ for var_index in range(len(valid_variables)):
     
     unscale_factor = var_max - var_min
     
-    plt.plot(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+    i = int(np.floor(count / 3))
+    j = count % 3
+    
+    ax[i, j].plot(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
              # reshape lumps all lakes and times together by variable
-             np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
-    plt.scatter(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+             np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                  color = '#1b9e77')
+    ax[i, j].scatter(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
                 np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
-                label = 'avg lstm')
-    plt.plot(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
-                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
-    plt.scatter(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                label = 'Average LSTM',
+                  color = '#1b9e77')
+    ax[i, j].plot(large_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(large_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                  color = '#7570b3')
+    ax[i, j].scatter(large_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(large_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'Large LSTM',
+                  color = '#7570b3')
+    ax[i, j].plot(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
                 np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
-                label = 'massive lstm')
-    plt.ylabel('Probability of Ice Cover')
-    plt.xlabel(var_name)
-    plt.axvline(var_min, color = 'grey', linestyle = '--', label = 'training limit')
-    plt.axvline(var_max, color = 'grey', linestyle = '--')
-    plt.legend()
-    if var_index == 0:
-        plt.title('Partial Dependence Plot')
-    plt.pause(0.0001)
+                  color = '#d95f02')
+    ax[i, j].scatter(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'Massive LSTM',
+                  color = '#d95f02')
+    if j == 0:
+        ax[i, j].set_ylabel('Probability of Ice Cover')
+    ax[i, j].set_xlabel(var_name)
+    ax[i, j].axvline(var_min, color = 'grey', linestyle = '--', label = 'training limit')
+    ax[i, j].axvline(var_max, color = 'grey', linestyle = '--')
+    ax[i, j].set_ylim(0, 1)
+    
+    new_yticks = []
+    for val in ax[i, j].get_yticks():
+        new_yticks.append(str(int(100*val)) + '%')
+    ax[i, j].set_yticklabels(new_yticks)
+        
+    
+handles, labels = ax[i, j].get_legend_handles_labels()
+fig.legend(handles, labels, bbox_to_anchor = [0.575, 0.175])
+ax[3, 1].axis('off')
+ax[3, 2].axis('off')
+plt.suptitle('Partial Dependence Plots')
+plt.tight_layout()
+plt.savefig("../../PDPs_model_size_comparison.png", dpi = 300)
+```
+
+```python
+for var_index in range(len(valid_variables)):
+    
+    avg_min_extreme_pred = np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1)[0]
+    avg_max_extreme_pred = np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1)[-1]
+    
+    large_min_extreme_pred = np.mean(large_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1)[0]
+    large_max_extreme_pred = np.mean(large_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1)[-1]
+    
+    massive_min_extreme_pred = np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1)[0]
+    massive_max_extreme_pred = np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1)[-1]
+    
+    ordered_names = ['avg', 'large', 'massive']
+    min_extreme_preds = [avg_min_extreme_pred,
+                         large_min_extreme_pred,
+                         massive_min_extreme_pred]
+    median_min_extreme_pred = np.median(min_extreme_preds)
+    
+    max_extreme_preds = [avg_max_extreme_pred,
+                         large_max_extreme_pred,
+                         massive_max_extreme_pred]
+    median_max_extreme_pred = np.median(max_extreme_preds)
+    
+    relative_min_extremity = np.abs(min_extreme_preds - median_min_extreme_pred)
+    relative_max_extremity = np.abs(max_extreme_preds - median_max_extreme_pred)
+    
+    print(valid_variables[var_index])
+    print('Minimum end')
+    if np.max(np.abs(relative_min_extremity)) > 0.05:
+        emphasizer = '**********************'
+    else:
+        emphasizer = ''
+    print(median_min_extreme_pred,
+          ordered_names[np.argmax(relative_min_extremity)],
+          min_extreme_preds[np.argmax(relative_min_extremity)],
+          min_extreme_preds[np.argmax(relative_min_extremity)] - median_min_extreme_pred,
+          emphasizer)
+    print('Maximum end')
+    if np.max(np.abs(relative_max_extremity)) > 0.05:
+        emphasizer = '**********************'
+    else:
+        emphasizer = ''
+    print(median_max_extreme_pred,
+          ordered_names[np.argmax(relative_max_extremity)],
+          max_extreme_preds[np.argmax(relative_max_extremity)],
+          max_extreme_preds[np.argmax(relative_max_extremity)] - median_max_extreme_pred,
+          emphasizer)
+    print('\n')
 ```
 
 PDP take-aways:
 
-#### When using latitude
+#### When using latitude, not using process-based inputs, and comparing models of different sizes
 
-##### ... and when using process-based inputs
-
-1. Across variables, the models behave similarly for a lot of the input values.
-2. The `massive lstm` (remember labels are swapped) does not exclusively behave wilder at extremes. The model that does display wilder behavior displays nonlinear behavior which extrapolates divergently into out-of-sample values.
-  * Notably, it does for `LakeArea`, `MaxDepth`, `RelHum`, and `LongWave`, althought all of these except `LongWave` operate over approx. 5% total change in prediction.
-  * `avg lstm` displays wilder behavior for `ShortWave` and `Windspeed`, although windspeed operates over approx. 5% total change in prediction
-
-##### ... and when NOT using process-based inputs
-
-1. Across variables, the models behave very similarly for >90% of the input values.
-2. There are only minor differences between the bounds of training data; this high similarity is likely because of the identical model structure/size.
-
-#### When not using latitude
-
-##### ... and when using process-based inputs
-
-1. Across variables, the models behave very similarly for >90% of the input values.
-  * For the top-3 variables, the continuous valued variables highly resemble each other.
-2. The `massive lstm` does not exclusively behave wilder at extremes. The model that does display wilder behavior displays nonlinear behavior which extrapolates divergently into out-of-sample values.
-  * Notably, it does for `LakeArea` and `LongWave`, althought `LakeArea` operates over substantially smaller changes in prediction.
-  * `avg lstm` displays wilder behavior for `RelHum` and `ShortWave`
-3. These plots may demonstrate why EGs assign different attribution between models.
-  * E.g., `avg lstm`s weighted `RelHum` and `WindSpeed` higher than `massive lstm`s. Likewise, the `avg lstm` assigns a slight nonlinear effect to these variables which prescribes higher probability of ice over these ~90% of their values
-
-##### ... and when NOT using process-based inputs
-
-1. The models can learn noticeably different and even opposing patterns (e.g., positive vs negative; linear vs nonlinear)
-2. Behavior at the extremes:
-  * The `massive` lstm behaves wilder at the extremes for `LakeArea`
-  * The `avg` lstm behaves wilder at the extremes for `MaxDepth` and `RelHum`
-    * These values operate over larger changes in % of ice
-  * Others are too different or plausible to speak on
-3. These plot helps illustrate the difference in EG magnitudes for the top 3 variables. The `massive` model more greatly relies on `AirTemp` and assigns it a stronger threshold effect while assigned the radiation variables more linear effects. These three values are correlated and this ultimately likely means very little.
+See numbers above and paper.
 
 
-
-<!-- #region -->
 <br><br><br><br><br>
 
 # Conclusions
 
-#### When not using latitude
+#### When using latitude, not using process-based models, and comparing models of different sizes
 
-##### ... and when using process-based models
-
-* At a coarse, high-level the `avg lstm` and `massive lstm` behave similarly (beyond performance metrics).
-<br>
-
-* Expected gradients and permutated-based importance assigned similar variable importance, with permutation-based methods more heavily emphasizing the importance of the top-3 variables. Both methods and models assign top-3 importance to:
-  * Air temperature
-  * Process-based estimate of ice
-  * Process-based estimate of surface water temperature
-<br>
-<br>
-
-* Similarity of variable importance persists beyond the top-3, but the following disagreements are notable:
-  * The `massive lstm` weights process-based estimates of ice higher.
-  * The `avg lstm` weights relative humidity and wind speed higher.
-<br>
-<br>
-
-* For both models, input values occurring in the heat of summer and the dead of winter are not assigned predictive attribution.
-<br>
-
-* For both models, predicting the ice off transition assigns predictive attribution further back in time ($\geq 1$ week more).
-  * Along these lines, the `avg lstm` remembers for longer than the `massive lstm` in both scenarios, but this is more notable for ice on prediction (8 additional days compared to 3 additional days).
-  * Notably, when predicting ice on, both models assigned higher attribution to relative humidity, wind speed, snowfall and lake depth, and when predicting ice off, both models assigned higher attribution to lake area and measures of incoming radiation.
-<br> 
-<br>
-   
-* Static variables (area and depth) mostly did not significantly affect the size of the attributed temporal window (where 95% of predictive attribution was assigned, unit = days). It may be possible that a larger sample or an analysis including the effect of temperature and/or latitude could find otherwise.
-  * one exception is that deeper lakes (which were positively and signficantly correlated with larger area lakes) were positively and significantly correlated with increased memory.
-
-<br>
-
-* Across 90% of the range of input values, the models behave very similarly at high-level trend directions and shapes.
-* The `massive lstm` (>18 million parameters) did not exclusively behave wilder in out-of-sample input values relative to the `avg lstm` (~2000 parameters)
-  * The `massive lstm` extrapolates into new values of lake area and long wave radiation more divergently
-  * The `avg lstm` extrapolates into new values of relative humidity and short wave radiation more divergently
-  
-  
-*Caveat*: PDP-approach for exploring prediction at out-of-sample input values varies one input variable at a time into new values while the others inputs are using in-sample values. This has the limitation of considering potentially unrealistic values (e.g., unrealistic combinations of rain fall and incoming radiation) and may not accurately consider how multiple variable may covary into out-of-sample space.
-
-##### ... and when not using process-based models
-
-* At a coarse, high-level the `avg` and `massive` lstm behave similar, but individual feature-level patterns can notably vary
-<br>
-
-* Expected gradients and permutation-based importance identify the same top-4 features with differing order:
-  * Air temperature
-  * Longwave radiation
-  * Max depth
-  * Shortwave radiation
-<br>
-<br>
-  
-* Variable ranking is less consistent across methods below the top-4 features, however `rain` is most consistently seen as less important
-  * Permutation-based feature importance recognizes static features more
-  * EGs recognize dynamic features more
-<br>
-<br>
-  
-* For both models, input values occuring in the heat of summer are not assigned predictive attribution
-<br>
-
-* For both models, predicting the ice off transition assigns predictive attribution further back in time (on the order of $2$ additional months).
-  * Along these lines, the `avg lstm` remembers for longer than the `massive lstm` in both scenarios, but this is more notable for ice off prediction (20 additional days compared to 3 additional days).
-  * Notably, when predicting ice on, both models assigned higher attribution to wind speed, lake depth, and relative humidity and when predicting ice off, both models assigned higher attribution to measures of incoming radiation.
-<br>
-<br>
-
-* Static variables (area and depth) were found to significantly correlate with the size of the attributed temporal window (where 95% of predictive attribution was assigned, unit = days).
-  * ice-off had the clearest findings, where more expansive and deeper lakes were independently found to have larger memory
-    * the `avg` lstm's memory also saw a positive and significant correlation with latitude
-  * depth was significantly but opposingly correlated with ice-on memory. The `massive` models positive correlation was more plausible
-  * one exception is that more expansive lakes were not correlated with ice-on memory
-<br>
-<br>
-
-* At the feature-level, there was not convergence between the models' learned patterns. The models found disagreeing levels of positive/negative correlation, linear/nonlinear effects, and threshold points/strengths. The `avg` lstm deviated into larger predictive changes when given new out-of-sample feature values (e.g., for `MaxDepth` and `RelHumid`).
-<!-- #endregion -->
-
-<br><br><br>
-
-### Paper figure - not yet updated; is nonsense for `remove_PB = True`
-
-```python
-valid_variables
-```
-
-```python
-nice_labels = ['Air temperature', 'Process-based estimate of ice', 'Process-based estimate of \nsurface water temperature',
-               'Longwave radiation', 'Shortwave radiation', 'Relative humidity']
-
-fig, ax = plt.subplots(2, 3, figsize = (15, 10))
-
-fig.suptitle('Highlighted Partial Dependence Plots')
-
-count = 0
-for var_index in [2, 7, 8, 1, 0, 3]:
-    
-    if count < 3:
-        i = 0
-        j = count
-    else:
-        i = 1
-        j = count - 3
-    
-    var_min = avg_min_max_scalars[var_index, 0].item()
-    var_max = avg_min_max_scalars[var_index, 1].item()
-    var_name = valid_variables[var_index]
-    if var_name in ['MaxDepth', 'LakeArea']:
-        var_name = 'log ' + var_name
-    
-    unscale_factor = var_max - var_min
-    
-    ax[i, j].plot(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
-             # reshape lumps all lakes and times together by variable
-             np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
-    ax[i, j].scatter(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
-                np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
-                label = 'avg lstm')
-    ax[i, j].plot(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
-                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
-    ax[i, j].scatter(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
-                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
-                label = 'massive lstm')
-    if j == 0:
-        ax[i, j].set_ylabel('Probability of Ice Cover')
-    #ax[i, j].set_ylim(0, 1)
-    ax[i, j].set_xlabel(nice_labels[count])
-    ax[i, j].axvline(var_min, color = 'grey', linestyle = '--', label = 'training limit')
-    ax[i, j].axvline(var_max, color = 'grey', linestyle = '--')
-    if i == 0 and j == 1:
-        ax[i, j].legend()
-    count += 1
-    
-plt.savefig('../../highlighted_PDPs.PNG', dpi = 300, bbox_inches = 'tight')
-```
-
-```python
-nice_labels = ['Air temperature', 'Process-based estimate of ice', 'Process-based estimate of \nsurface water temperature',
-               'Longwave radiation', 'Shortwave radiation', 'Relative humidity']
-
-fig, ax = plt.subplots(2, 3, figsize = (15, 10))
-
-fig.suptitle('Highlighted Partial Dependence Plots')
-
-count = 0
-for var_index in [2, 7, 8, 1, 0, 3]:
-    
-    if count < 3:
-        i = 0
-        j = count
-    else:
-        i = 1
-        j = count - 3
-    
-    var_min = avg_min_max_scalars[var_index, 0].item()
-    var_max = avg_min_max_scalars[var_index, 1].item()
-    var_name = valid_variables[var_index]
-    if var_name in ['MaxDepth', 'LakeArea']:
-        var_name = 'log ' + var_name
-    
-    unscale_factor = var_max - var_min
-    
-    ax[i, j].plot(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
-             # reshape lumps all lakes and times together by variable
-             np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
-    ax[i, j].scatter(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
-                np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
-                label = 'avg lstm')
-    ax[i, j].plot(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
-                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1))
-    ax[i, j].scatter(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
-                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
-                label = 'massive lstm')
-    if j == 0:
-        ax[i, j].set_ylabel('Probability of Ice Cover')
-    ax[i, j].set_ylim(0, 1)
-    ax[i, j].set_xlabel(nice_labels[count])
-    ax[i, j].axvline(var_min, color = 'grey', linestyle = '--', label = 'training limit')
-    ax[i, j].axvline(var_max, color = 'grey', linestyle = '--')
-    if i == 0 and j == 1:
-        ax[i, j].legend()
-    count += 1
-    
-plt.savefig('../../highlighted_PDPs_fullYaxis.PNG', dpi = 300, bbox_inches = 'tight')
-```
-
-```python
-
-```
+See paper
