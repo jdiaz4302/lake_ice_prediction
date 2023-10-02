@@ -80,7 +80,7 @@ color_dict = {'avg lstm':'#1b9e77',
               'massive transformer':'#e6ab02',}
 
 # remove process-based or not
-remove_PB = False
+remove_PB = True
 # this corresponds to some known indices (dependent on data assembly steps)
 # of bad model performance to remove because they complicate analysis
 # 11 never predicts freeze
@@ -102,17 +102,21 @@ if use_lat:
     if remove_PB:
         second_best_eval_metrics_fpath = '../out_WithLat/massive_lstm_eval_metrics_4_NoProcessBasedInput_.npz'
         best_eval_metrics_fpath = '../out_WithLat/massive_lstm_eval_metrics_3_NoProcessBasedInput_.npz'
+        eval_table_fpath = '../out_WithLat/eval_table_woutPBM.csv'
     else:
         second_best_eval_metrics_fpath = '../out_WithLat/massive_lstm_eval_metrics_2_.npz'
         best_eval_metrics_fpath = '../out_WithLat/avg_lstm_eval_metrics_0_.npz'
+        eval_table_fpath = '../out_WithLat/eval_table_withPBM.csv'
     
 else:
     if remove_PB:
         second_best_eval_metrics_fpath = '../out/avg_lstm_eval_metrics_4_NoProcessBasedInput_.npz'
         best_eval_metrics_fpath = '../out/massive_lstm_eval_metrics_0_NoProcessBasedInput_.npz'
+        eval_table_fpath = '../out/eval_table_woutPBM.csv'
     else:
         second_best_eval_metrics_fpath = '../out/avg_lstm_eval_metrics_3_.npz'
         best_eval_metrics_fpath = '../out/massive_lstm_eval_metrics_1_.npz'
+        eval_table_fpath = '../out/eval_table_withPBM.csv'
 ```
 
 # Import data
@@ -625,7 +629,7 @@ for i in range(n_compare):
 # extra formatting
 plt.ylabel('Change in RMSE (%)\nRelative to Process-Based RMSE')
 plt.title('Average Change in Date-based Performance:\nIce on, Ice off, Ice Duration')
-plt.xticks(range(1,6), focal_models, rotation = 45)
+plt.xticks(range(1,6), focal_models, rotation = 45);
 #plt.savefig('../../overall_model_comparison.PNG', dpi = 300, bbox_inches = 'tight')
 ```
 
@@ -703,6 +707,166 @@ evals2 = {'flag_error_ice_on':flag_ice_on_error,
 
 ```python
 np.savez_compressed(second_best_eval_metrics_fpath, **evals2)
+```
+
+```python
+eval_df.to_csv(eval_table_fpath)
+```
+
+<br><br><br><br><br>
+
+# Additional/optional: gather all runs
+
+```python
+count = 0 
+for out_dir in ['../out/', '../out_WithLat/']:
+    if out_dir == '../out/':
+        lat_flag = 'False'
+    else:
+        lat_flag = 'True'
+    for PBM_usage in ['woutPBM', 'withPBM']:
+        if PBM_usage == 'woutPBM':
+            pbm_flag = 'False'
+        else:
+            pbm_flag = 'True'
+            
+        cur_fpath = out_dir + 'eval_table_' + PBM_usage + '.csv'
+        
+        cur_eval_df = pd.read_csv(cur_fpath)
+        cur_eval_df['lat_flag'] = lat_flag
+        cur_eval_df['pbm_flag'] = pbm_flag
+        
+        if count == 0:
+            whole_eval_df = cur_eval_df.copy()
+        else:
+            whole_eval_df = pd.concat([whole_eval_df, cur_eval_df])
+        count += 1
+        
+whole_eval_df = whole_eval_df[whole_eval_df['name'] != 'process-based']
+whole_eval_df = whole_eval_df.reset_index(drop=True)
+```
+
+```python
+# get the percent change in RMSEs relative to PB ice flags
+rmse_df = whole_eval_df.loc[:, ['ice_on_rmse', 'ice_off_rmse', 'ice_dur_rmse']]
+rmse_pb = eval_df.iloc[-1][['ice_on_rmse', 'ice_off_rmse', 'ice_dur_rmse']]
+perc_change_rmse = (rmse_df - rmse_pb)/rmse_pb
+perc_change_rmse
+```
+
+```python
+np.median(perc_change_rmse['ice_on_rmse'])
+```
+
+```python
+np.median(perc_change_rmse['ice_off_rmse'])
+```
+
+```python
+np.median(perc_change_rmse['ice_dur_rmse'])
+```
+
+```python
+print(whole_eval_df['ice_on_avg_error'].mean(), whole_eval_df['ice_on_avg_error'].std(), '\n',
+     whole_eval_df['ice_off_avg_error'].mean(), whole_eval_df['ice_off_avg_error'].std(), '\n',
+     whole_eval_df['ice_dur_avg_error'].mean(), whole_eval_df['ice_dur_avg_error'].std())
+```
+
+```python
+print(whole_eval_df['ice_on_rmse'].mean(), whole_eval_df['ice_on_rmse'].std(), '\n',
+     whole_eval_df['ice_off_rmse'].mean(), whole_eval_df['ice_off_rmse'].std(), '\n',
+     whole_eval_df['ice_dur_rmse'].mean(), whole_eval_df['ice_dur_rmse'].std())
+```
+
+```python
+fig, ax = plt.subplots(1, 1)
+ax2 = ax.twinx()
+
+for i in range(whole_eval_df.shape[0]):
+
+    x_adjust = 0.25
+    if whole_eval_df['lat_flag'][i] == 'True':
+        marker = '^'
+    else:
+        x_adjust += -.125
+        marker = 's'
+        
+    if whole_eval_df['pbm_flag'][i] == 'True':
+        x_adjust += -.25
+        markercolor = color_dict[whole_eval_df['name'][i]]
+    else:
+        markercolor = 'None'
+    
+    ax.scatter(np.argwhere(np.asarray(list(color_dict.values())) == color_dict[whole_eval_df['name'][i]]).item() + x_adjust,
+                whole_eval_df['avg_rmse_change'][i],
+                edgecolor = color_dict[whole_eval_df['name'][i]],
+                color = markercolor,
+                marker = marker, zorder = 1)
+    ax2.scatter(np.argwhere(np.asarray(list(color_dict.values())) == color_dict[whole_eval_df['name'][i]]).item() + x_adjust,
+                whole_eval_df['avg_rmse_change'][i],
+                marker = 'None')
+
+ax2.axhline(0, color = 'black', linestyle = '--')
+ax.axhline(0, color = 'black', linestyle = '--')
+    
+new_yticks = []
+for perc_change in ax.get_yticks():
+    new_yticks.append(perc_change*eval_df.iloc[-1][['ice_on_rmse', 'ice_off_rmse', 'ice_dur_rmse']].mean() + eval_df.iloc[-1][['ice_on_rmse', 'ice_off_rmse', 'ice_dur_rmse']].mean())
+ax.set_yticklabels(np.round(new_yticks, 1))
+
+nice_RMSEs = [7, 8, 9, 10, 11, 12]
+new_yticks = []
+for nice_RMSE in nice_RMSEs:
+    new_yticks.append((nice_RMSE - eval_df.iloc[-1][['ice_on_rmse', 'ice_off_rmse', 'ice_dur_rmse']].mean()) / eval_df.iloc[-1][['ice_on_rmse', 'ice_off_rmse', 'ice_dur_rmse']].mean())
+ax.set_yticks(new_yticks)
+ax.set_yticklabels(nice_RMSEs)
+for val in new_yticks:
+    ax.axhline(val, color = 'lightgray', linewidth = 1/2)
+for val in ax.get_xticks()[1:-1]:
+    ax.axvline(val + 0.0675, color = 'lightgray', linewidth = 1/2)
+    
+
+new_yticks2 = []
+for perc_change in ax2.get_yticks():
+    new_yticks2.append(str(int(np.round(perc_change*100))) + '%')
+ax2.set_yticklabels(new_yticks2)
+
+ax.set_xticks(range(5), ['Average\nLSTM', 'Large\nLSTM', 'Massive\nLSTM', 'Average\nTransformer', 'Large\nTransformer'])
+
+plt.title('Average date-based performance of models')
+ax2.set_ylabel("Relative to GLM ice flags (%)")
+ax.set_ylabel("RMSE (days)")
+
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+
+legend_elements = [Line2D([0], [0], marker='^', color='None', label='With latitude, without GLM',
+                          markerfacecolor='None', markeredgecolor='black'),
+                   Line2D([0], [0], marker='s', color='None', label='Without latitude, without GLM',
+                          markerfacecolor='None', markeredgecolor='black'),
+                   Line2D([0], [0], marker='^', color='None', label='With latitude, with GLM',
+                          markerfacecolor='black', markeredgecolor='black'),
+                   Line2D([0], [0], marker='s', color='None', label='Without latitude, with GLM',
+                          markerfacecolor='black', markeredgecolor='black'),
+                   Line2D([0], [0], marker='s', color='black', label='GLM reference', linestyle = '--',
+                          markerfacecolor='None', markeredgecolor='None'),
+                   Line2D([0], [0], marker='s', color='black', label='Median', linewidth = 3,
+                          markerfacecolor='None', markeredgecolor='None')]
+ax.legend(handles=legend_elements, bbox_to_anchor = [1.125, 1])
+
+for count, name in enumerate(focal_models):
+    x_adjust = 0.25
+    for lat_flag in ['True', 'False']:
+        for pbm_flag in ['True', 'False']:  
+            x_adjust = 0.25
+            if lat_flag != 'True':
+                x_adjust += -.125
+            if pbm_flag == 'True':
+                x_adjust += -.25
+                
+            median_val = whole_eval_df[(whole_eval_df['name'] == name)*(whole_eval_df['lat_flag'] == lat_flag)*(whole_eval_df['pbm_flag'] == pbm_flag)]['avg_rmse_change'].median()
+            ax.plot([count+x_adjust-0.0675, count+x_adjust+0.0675], [median_val, median_val], color = 'black', linewidth = 3, zorder = 2)
+plt.savefig("../../overall_performance_figure.png", dpi = 300, bbox_inches = 'tight')
 ```
 
 <br><br><br><br><br>
@@ -831,8 +995,4 @@ for i in range(3):
     ax[i].plot([lower_lim, upper_lim], [lower_lim, upper_lim], color = 'black')
     ax[i].set_xticks(np.arange(lower_lim, upper_lim, 20))
     ax[i].set_yticks(np.arange(lower_lim, upper_lim, 20));
-```
-
-```python
-
 ```
