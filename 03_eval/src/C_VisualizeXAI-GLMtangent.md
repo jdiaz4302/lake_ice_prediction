@@ -979,6 +979,138 @@ Permutation results further deemphasize the importance of radiation and moderate
 Rather than just importance and timing, let's also get an idea for how prediction vary over the range of input variables. This will be performed across many quantiles, including the training min and max, and values beyond the training min and max.
 
 ```python
+random_indices = np.random.choice(massive_valid_set_ICE_preds[0].reshape(resolution + 3, -1).shape[1], 1000)
+```
+
+```python
+fig, ax = plt.subplots(4, 3, figsize = (12, 12))
+
+for count, var_index in enumerate(range(len(valid_variables))):
+    
+    var_min = avg_min_max_scalars[var_index, 0].item()
+    var_max = avg_min_max_scalars[var_index, 1].item()
+    var_name = valid_variables[var_index]
+    if var_name in ['MaxDepth', 'LakeArea']:
+        var_name = 'log ' + var_name
+    
+    unscale_factor = var_max - var_min
+    
+    i = int(np.floor(count / 3))
+    j = count % 3
+    
+    ax[i, j].plot(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+             # reshape lumps all lakes and times together by variable
+             np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                  color = '#1b9e77', zorder = 1)
+    ax[i, j].scatter(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'Average LSTM',
+                  color = '#1b9e77', zorder = 1)
+    ax[i, j].plot(large_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(large_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                  color = '#7570b3', zorder = 2)
+    ax[i, j].scatter(large_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(large_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'Large LSTM',
+                  color = '#7570b3', zorder = 2)
+    ax[i, j].plot(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                  color = '#d95f02', zorder = 3)
+    ax[i, j].scatter(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'Massive LSTM, average',
+                  color = '#d95f02', zorder = 3)
+
+    ax[i, j].plot(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                  avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1)[:, random_indices],
+                  alpha = 0.05, color = 'black', zorder = 0, label = 'Average LSTM, individual')
+
+    
+    if j == 0:
+        ax[i, j].set_ylabel('Probability of Ice Cover')
+    ax[i, j].set_xlabel(var_name)
+    ax[i, j].axvline(var_min, color = 'grey', linestyle = '--', label = 'training limit')
+    ax[i, j].axvline(var_max, color = 'grey', linestyle = '--')
+    #ax[i, j].set_ylim(0, 1)
+    
+    new_yticks = []
+    for val in ax[i, j].get_yticks():
+        new_yticks.append(str(int(100*val)) + '%')
+    ax[i, j].set_yticklabels(new_yticks)
+        
+        
+handles, labels = ax[0, 0].get_legend_handles_labels()
+by_label = dict(zip(labels, handles))
+fig.legend(by_label.values(), by_label.keys(), bbox_to_anchor = [0.575, 0.175])
+    
+#handles, labels = ax[i, j].get_legend_handles_labels()
+#fig.legend(handles, labels, bbox_to_anchor = [0.575, 0.175])
+plt.suptitle('Partial Dependence Plots')
+plt.tight_layout()
+#plt.savefig("../../PDPs_model_size_comparison.png", dpi = 300)
+```
+
+```python
+fig, ax = plt.subplots(4, 3, figsize = (12, 12))
+
+for count, var_index in enumerate(range(len(valid_variables))):
+    
+    var_min = avg_min_max_scalars[var_index, 0].item()
+    var_max = avg_min_max_scalars[var_index, 1].item()
+    var_name = valid_variables[var_index]
+    if var_name in ['MaxDepth', 'LakeArea']:
+        var_name = 'log ' + var_name
+    
+    unscale_factor = var_max - var_min
+    
+    i = int(np.floor(count / 3))
+    j = count % 3
+    
+    ax[i, j].plot(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+             # reshape lumps all lakes and times together by variable
+             np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                  color = '#1b9e77')
+    ax[i, j].scatter(avg_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(avg_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'Average LSTM',
+                  color = '#1b9e77')
+    ax[i, j].plot(large_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(large_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                  color = '#7570b3')
+    ax[i, j].scatter(large_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(large_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'Large LSTM',
+                  color = '#7570b3')
+    ax[i, j].plot(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                  color = '#d95f02')
+    ax[i, j].scatter(massive_valid_set_ICE_vals[var_index]*unscale_factor + var_min,
+                np.mean(massive_valid_set_ICE_preds[var_index].reshape(resolution + 3, -1), 1),
+                label = 'Massive LSTM',
+                  color = '#d95f02')
+    if j == 0:
+        ax[i, j].set_ylabel('Probability of Ice Cover')
+    ax[i, j].set_xlabel(var_name)
+    ax[i, j].axvline(var_min, color = 'grey', linestyle = '--', label = 'training limit')
+    ax[i, j].axvline(var_max, color = 'grey', linestyle = '--')
+    #ax[i, j].set_ylim(0, 1)
+    
+    new_yticks = []
+    new_ytick_labels = []
+    for val in ax[i, j].get_yticks():
+        new_yticks.append(val)
+        new_ytick_labels.append(str(int(100*val)) + '%')
+    ax[i, j].set_yticks(new_yticks, new_ytick_labels)
+        
+    
+handles, labels = ax[i, j].get_legend_handles_labels()
+fig.legend(handles, labels, bbox_to_anchor = [0.575, 0.175])
+plt.suptitle('Partial Dependence Plots')
+plt.tight_layout()
+#plt.savefig("../../PDPs_model_size_comparison.png", dpi = 300)
+```
+
+```python
 fig, ax = plt.subplots(4, 3, figsize = (12, 12))
 
 for count, var_index in enumerate(range(len(valid_variables))):
