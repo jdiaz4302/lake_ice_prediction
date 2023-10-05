@@ -25,58 +25,6 @@ import torch.nn as nn
 ### Inputs
 
 <!-- #raw -->
-# USE THIS 
-process_out_dir = '01_process/out/'
-
-train_data_fpath = process_out_dir + 'train_data.npz'
-valid_data_fpath = process_out_dir + 'valid_data.npz'
-
-train_out_dir = '02_train/out/'
-
-data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_3_.pt'
-model_weights_fpath = train_out_dir + 'avg_lstm_weights_3_.pth'
-<!-- #endraw -->
-
-<!-- #raw -->
-# OR THIS
-process_out_dir = '01_process/out/'
-
-train_data_fpath = process_out_dir + 'train_data.npz'
-valid_data_fpath = process_out_dir + 'valid_data.npz'
-
-train_out_dir = '02_train/out/'
-
-data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_1_.pt'
-model_weights_fpath = train_out_dir + 'massive_lstm_weights_1_.pth'
-<!-- #endraw -->
-
-<!-- #raw -->
-# OR THIS
-process_out_dir = '01_process/out/'
-
-train_data_fpath = process_out_dir + 'train_data.npz'
-valid_data_fpath = process_out_dir + 'valid_data.npz'
-
-train_out_dir = '02_train/out/'
-
-data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_4_NoProcessBasedInput_.pt'
-model_weights_fpath = train_out_dir + 'avg_lstm_weights_4_NoProcessBasedInput_.pth'
-<!-- #endraw -->
-
-<!-- #raw -->
-# OR THIS
-process_out_dir = '01_process/out/'
-
-train_data_fpath = process_out_dir + 'train_data.npz'
-valid_data_fpath = process_out_dir + 'valid_data.npz'
-
-train_out_dir = '02_train/out/'
-
-data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_0_NoProcessBasedInput_.pt'
-model_weights_fpath = train_out_dir + 'massive_lstm_weights_0_NoProcessBasedInput_.pth'
-<!-- #endraw -->
-
-<!-- #raw -->
 # OR THIS
 process_out_dir = '01_process/out_WithLat/'
 
@@ -115,6 +63,32 @@ data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_3_NoProcessB
 model_weights_fpath = train_out_dir + 'massive_lstm_weights_3_NoProcessBasedInput_.pth'
 <!-- #endraw -->
 
+<!-- #raw -->
+# OR THIS
+process_out_dir = '01_process/out_WithLat/'
+
+train_data_fpath = process_out_dir + 'train_data.npz'
+valid_data_fpath = process_out_dir + 'valid_data.npz'
+
+train_out_dir = '02_train/out_WithLat/'
+
+data_scalars_fpath =  train_out_dir + 'large_lstm_min_max_scalars_3_NoProcessBasedInput_.pt'
+model_weights_fpath = train_out_dir + 'large_lstm_weights_3_NoProcessBasedInput_.pth'
+<!-- #endraw -->
+
+<!-- #raw -->
+# OR THIS
+process_out_dir = '01_process/out_WithLat/'
+
+train_data_fpath = process_out_dir + 'train_data.npz'
+valid_data_fpath = process_out_dir + 'valid_data.npz'
+
+train_out_dir = '02_train/out_WithLat/'
+
+data_scalars_fpath =  train_out_dir + 'avg_lstm_min_max_scalars_1_NoProcessBasedInput_.pt'
+model_weights_fpath = train_out_dir + 'avg_lstm_weights_1_NoProcessBasedInput_.pth'
+<!-- #endraw -->
+
 ```python
 # OR THIS
 process_out_dir = '01_process/out_WithLat/'
@@ -124,8 +98,8 @@ valid_data_fpath = process_out_dir + 'valid_data.npz'
 
 train_out_dir = '02_train/out_WithLat/'
 
-data_scalars_fpath =  train_out_dir + 'massive_lstm_min_max_scalars_4_NoProcessBasedInput_.pt'
-model_weights_fpath = train_out_dir + 'massive_lstm_weights_4_NoProcessBasedInput_.pth'
+data_scalars_fpath =  train_out_dir + 'large_lstm_min_max_scalars_4_.pt'
+model_weights_fpath = train_out_dir + 'large_lstm_weights_4_.pth'
 ```
 
 ```python
@@ -153,6 +127,15 @@ elif 'avg_lstm' in data_scalars_fpath:
     dropout_val = 0.1 # matching encoder default value
     nlayers = 1
     bs = 5000
+elif 'large_lstm' in data_scalars_fpath:
+    params = 3159041 # matching the full size, encoder only, transformer
+    model_dim = int(np.round((1/8)*(np.sqrt(16*params + 2385) - 49))) # assumes 11 variables 
+    # ^ solves for y where y = 4x^2 + 49x + 1
+    # which was originally y = 11*4*x + 4*x*x + 4*x + 1*x + 1
+    dropout_val = 0.1 # matching encoder default value
+    nlayers = 1
+    bs = 1000
+
     
 # when deriving the max ice on date, one detail is that
 # we must omit the late ice on dates that occur during a
@@ -186,66 +169,10 @@ vars_to_cap_at_1 = ['ice']
 vars_to_cap_at_100 = ['RelHum']
 
 # remove process-based or not
-remove_PB = True
+remove_PB = False
 ```
 
 ### Outputs
-
-<!-- #raw -->
-# USE THIS
-eval_out_dir = '03_eval/out/'
-
-rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_3_.npz'
-rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_3_.npz'
-rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_3_.npz'
-
-valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_3_.npy'
-
-valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_3_.npy'
-valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_3_.npy'
-<!-- #endraw -->
-
-<!-- #raw -->
-# OR THIS
-eval_out_dir = '03_eval/out/'
-
-rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_1_.npz'
-rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_1_.npz'
-rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_1_.npz'
-
-valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_1_.npy'
-
-valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_1_.npy'
-valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_1_.npy'
-<!-- #endraw -->
-
-<!-- #raw -->
-# USE THIS
-eval_out_dir = '03_eval/out/'
-
-rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_4_NoProcessBasedInput_.npz'
-rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_4_NoProcessBasedInput_.npz'
-rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_4_NoProcessBasedInput_.npz'
-
-valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_4_NoProcessBasedInput_.npy'
-
-valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_4_NoProcessBasedInput_.npy'
-valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_4_NoProcessBasedInput_.npy'
-<!-- #endraw -->
-
-<!-- #raw -->
-# OR THIS
-eval_out_dir = '03_eval/out/'
-
-rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_0_NoProcessBasedInput_.npz'
-rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_0_NoProcessBasedInput_.npz'
-rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_0_NoProcessBasedInput_.npz'
-
-valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_0_NoProcessBasedInput_.npy'
-
-valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_0_NoProcessBasedInput_.npy'
-valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_0_NoProcessBasedInput_.npy'
-<!-- #endraw -->
 
 <!-- #raw -->
 # OR THIS
@@ -289,18 +216,46 @@ valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_3_NoProce
 valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_3_NoProcessBasedInput_.npy'
 <!-- #endraw -->
 
+<!-- #raw -->
+# OR THIS
+eval_out_dir = '03_eval/out_WithLat/'
+
+rand_valid_set_EGs_fpath = eval_out_dir + 'large_lstm_random_valid_eg_coarse_3_NoProcessBasedInput_.npz'
+rand_valid_ice_on_EGs_fpath = eval_out_dir + 'large_lstm_random_valid_eg_ice_on_3_NoProcessBasedInput_.npz'
+rand_valid_ice_off_EGs_fpath = eval_out_dir + 'large_lstm_random_valid_eg_ice_off_3_NoProcessBasedInput_.npz'
+
+valid_set_permutation_fpath = eval_out_dir + 'large_lstm_permutation_results_3_NoProcessBasedInput_.npy'
+
+valid_set_ICE_vals_fpath = eval_out_dir + 'large_lstm_valid_ICE_vals_3_NoProcessBasedInput_.npy'
+valid_set_ICE_preds_fpath = eval_out_dir + 'large_lstm_valid_ICE_preds_3_NoProcessBasedInput_.npy'
+<!-- #endraw -->
+
+<!-- #raw -->
+# OR THIS
+eval_out_dir = '03_eval/out_WithLat/'
+
+rand_valid_set_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_coarse_1_NoProcessBasedInput_.npz'
+rand_valid_ice_on_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_on_1_NoProcessBasedInput_.npz'
+rand_valid_ice_off_EGs_fpath = eval_out_dir + 'avg_lstm_random_valid_eg_ice_off_1_NoProcessBasedInput_.npz'
+
+valid_set_permutation_fpath = eval_out_dir + 'avg_lstm_permutation_results_1_NoProcessBasedInput_.npy'
+
+valid_set_ICE_vals_fpath = eval_out_dir + 'avg_lstm_valid_ICE_vals_1_NoProcessBasedInput_.npy'
+valid_set_ICE_preds_fpath = eval_out_dir + 'avg_lstm_valid_ICE_preds_1_NoProcessBasedInput_.npy'
+<!-- #endraw -->
+
 ```python
 # OR THIS
 eval_out_dir = '03_eval/out_WithLat/'
 
-rand_valid_set_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_coarse_4_NoProcessBasedInput_.npz'
-rand_valid_ice_on_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_on_4_NoProcessBasedInput_.npz'
-rand_valid_ice_off_EGs_fpath = eval_out_dir + 'massive_lstm_random_valid_eg_ice_off_4_NoProcessBasedInput_.npz'
+rand_valid_set_EGs_fpath = eval_out_dir + 'large_lstm_random_valid_eg_coarse_4_.npz'
+rand_valid_ice_on_EGs_fpath = eval_out_dir + 'large_lstm_random_valid_eg_ice_on_4_.npz'
+rand_valid_ice_off_EGs_fpath = eval_out_dir + 'large_lstm_random_valid_eg_ice_off_4_.npz'
 
-valid_set_permutation_fpath = eval_out_dir + 'massive_lstm_permutation_results_4_NoProcessBasedInput_.npy'
+valid_set_permutation_fpath = eval_out_dir + 'large_lstm_permutation_results_4_.npy'
 
-valid_set_ICE_vals_fpath = eval_out_dir + 'massive_lstm_valid_ICE_vals_4_NoProcessBasedInput_.npy'
-valid_set_ICE_preds_fpath = eval_out_dir + 'massive_lstm_valid_ICE_preds_4_NoProcessBasedInput_.npy'
+valid_set_ICE_vals_fpath = eval_out_dir + 'large_lstm_valid_ICE_vals_4_.npy'
+valid_set_ICE_preds_fpath = eval_out_dir + 'large_lstm_valid_ICE_preds_4_.npy'
 ```
 
 ```python
