@@ -751,19 +751,20 @@ whole_eval_df = whole_eval_df.reset_index(drop=True)
 rmse_df = whole_eval_df.loc[:, ['ice_on_rmse', 'ice_off_rmse', 'ice_dur_rmse']]
 rmse_pb = eval_df.iloc[-1][['ice_on_rmse', 'ice_off_rmse', 'ice_dur_rmse']]
 perc_change_rmse = (rmse_df - rmse_pb)/rmse_pb
+perc_change_rmse = perc_change_rmse.astype(float) # for some reason (df - df / df) -> object
 perc_change_rmse
 ```
 
 ```python
-np.median(perc_change_rmse['ice_on_rmse'])
+perc_change_rmse['ice_on_rmse'].median(), whole_eval_df['ice_on_rmse'].median()
 ```
 
 ```python
-np.median(perc_change_rmse['ice_off_rmse'])
+perc_change_rmse['ice_off_rmse'].median(), whole_eval_df['ice_off_rmse'].median()
 ```
 
 ```python
-np.median(perc_change_rmse['ice_dur_rmse'])
+perc_change_rmse['ice_dur_rmse'].median(), whole_eval_df['ice_dur_rmse'].median()
 ```
 
 ```python
