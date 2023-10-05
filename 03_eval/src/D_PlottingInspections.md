@@ -34,18 +34,38 @@ train_data_fpath = process_out_dir + 'train_data.npz'
 valid_data_fpath = process_out_dir + 'valid_data.npz'
 
 remove_PB = True
+use_lat = True
 
-if remove_PB:
-    train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_0_NoProcessBasedInput_.npy'
-    valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_0_NoProcessBasedInput_.npy'
+if use_lat:
+    train_data_fpath = train_data_fpath.replace("out", "out_WithLat")
+    valid_data_fpath = valid_data_fpath.replace("out", "out_WithLat")
+    train_out_dir = train_out_dir.replace("out", "out_WithLat")
+    
+    if remove_PB:
+        
+        train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_3_NoProcessBasedInput_.npy'
+        valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_3_NoProcessBasedInput_.npy'
 
-    eval_metrics_fpath = '../out/massive_lstm_eval_metrics_0_NoProcessBasedInput_.npz'
+        eval_metrics_fpath = '../out_WithLat/massive_lstm_eval_metrics_3_NoProcessBasedInput_.npz'
+
+    else:
+        train_predictions_fpath = train_out_dir + 'avg_lstm_train_preds_0_.npy'
+        valid_predictions_fpath = train_out_dir + 'avg_lstm_valid_preds_0_.npy'
+
+        eval_metrics_fpath = '../out_WithLat/avg_lstm_eval_metrics_0_.npz'
     
 else:
-    train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_1_.npy'
-    valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_1_.npy'
+    if remove_PB:
+        train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_0_NoProcessBasedInput_.npy'
+        valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_0_NoProcessBasedInput_.npy'
 
-    eval_metrics_fpath = '../out/massive_lstm_eval_metrics_1_.npz'
+        eval_metrics_fpath = '../out/massive_lstm_eval_metrics_0_NoProcessBasedInput_.npz'
+
+    else:
+        train_predictions_fpath = train_out_dir + 'massive_lstm_train_preds_1_.npy'
+        valid_predictions_fpath = train_out_dir + 'massive_lstm_valid_preds_1_.npy'
+
+        eval_metrics_fpath = '../out/massive_lstm_eval_metrics_1_.npz'
 
 mapping_reference = "../../01_process/in/MN_ice/raw_data_from_DNR/lake_ice_id_spreadsheet.xlsx"
 ```
@@ -256,9 +276,46 @@ depths = valid_x[:, 0, depth_var_idx]
 plot_and_print_resid_corr(depths, 'Lake Maximum Depth\nlog-transformed')
 ```
 
-## List of significant residual correlations
+<!-- #region -->
+# List of significant residual correlations
 
-## With process-based inputs
+
+## With latitude
+
+### ...and with process-based inputs
+
+##### Latitude
+
+* The avg lstm's residuals are positively and signficantly correlated with latitude for ice off and ice duration
+    
+##### Lake depth
+    
+* The avg lstm's residuals are significantly and positively correlated for ice off
+
+#### In total
+
+* The avg lstm's residuals are significantly correlated with static lake descriptions in 3/12 tested scenarios, with those primarily being latitude
+
+### ... and with NO process-based inputs
+
+##### Latitude
+
+* The massive lstm's residuals are positively and signficantly correlated with latitude for ice off and ice duration
+    
+##### Lake depth
+    
+* The massive lstm's residuals are significantly and positively correlated for ice on while being significantly and negatively correlated for ice duration
+
+#### In total
+
+* The massive lstm's residuals are significantly correlated with static lake descriptions in 4/12 tested scenarios, with those being equally split between latitude and lake depth.
+
+While latitude still holds significant correlations, the magnitude of those correlations can be up to 3x smaller
+
+
+## Without latitude
+
+### ...and with process-based inputs
 
 ##### Latitude
 
@@ -280,21 +337,22 @@ plot_and_print_resid_corr(depths, 'Lake Maximum Depth\nlog-transformed')
     * Negatively correlated for ice on, positively correlated for ice duration
 * The massive lstm's residuals are significantly and positively correlated for ice on prediction
 
-### In total
+#### In total
 
 * The process-based model's residuals are significantly correlated with static lake descriptions in 9/12 tested scenarios, most notably latitude and lake area for all 3 date-based predictions.
 * The massive lstm's residuals are significantly correlated with static lake descriptions in 4/12 tested scenarios, with 3 of those scenarios involving latitude.
 
-## With NO process-based inputs
+### ... and with NO process-based inputs
 
 ##### Latitude
 
 * massive lstm residuals were significantly and positively correlated with latitude for ice off and ice duration
 
-### In total
+#### In total
 
 * The massive lstm's residuals are significantly correlated with static lake descriptions in 2/12 tested scenarios, with both of those scenarios involving latitude.
 
+<!-- #endregion -->
 
 ```python
 
